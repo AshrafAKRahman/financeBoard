@@ -1,0 +1,59 @@
+[project]
+name = "finance-erp"
+version = "0.1.0"
+description = "Finance ERP backend (Saudi Arabia) — ledger-first"
+requires-python = ">=3.13,<3.14"
+dependencies = [
+    "fastapi>=0.115",
+    "uvicorn[standard]>=0.32",
+    "sqlalchemy>=2.0.36",
+    "psycopg[binary]>=3.2",
+    "alembic>=1.14",
+    "pydantic>=2.9",
+    "pydantic-settings>=2.6",
+]
+
+[dependency-groups]
+dev = [
+    "pytest>=8.3",
+    "pytest-xdist>=3.6",
+    "hypothesis>=6.115",
+    "ruff>=0.8",
+    "import-linter>=2.1",
+    "httpx>=0.28",
+]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-ra --strict-markers"
+markers = [
+    "db: needs TEST_DATABASE_URL (a Neon branch); skipped otherwise",
+]
+
+[tool.ruff]
+line-length = 100
+target-version = "py313"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "B", "UP", "SIM", "DTZ", "RUF"]
+
+[tool.importlinter]
+root_package = "app"
+
+[[tool.importlinter.contracts]]
+name = "Module layers: ledger -> platform -> shared"
+type = "layers"
+layers = [
+    "app.main",
+    "app.ledger",
+    "app.platform",
+    "app.shared",
+]
+
+[[tool.importlinter.contracts]]
+name = "Platform modules are independent"
+type = "independence"
+modules = [
+    "app.platform.tenancy",
+    "app.platform.sequence",
+]

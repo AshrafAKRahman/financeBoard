@@ -1,0 +1,90 @@
+name: Backend
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "backend/**"
+      - ".github/workflows/backend.yml"
+  pull_request:
+    paths:
+      - "backend/**"
+      - ".github/workflows/backend.yml"
+
+concurrency:
+  group: backend-${{ github.ref }}
+  cancel-in-progress: true
+
+defaults:
+  run:
+    working-directory: backend
+
+jobs:
+  quality:
+    name: Lint and module boundaries
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: astral-sh/setup-uv@v5
+        with:
+          enable-cache: true
+          cache-dependency-glob: backend/uv.lock
+
+      - name: Install dependencies
+        run: uv sync --group dev --frozen
+
+      - name: Ruff
+        run: uv run ruff check .
+
+      - name: Architecture contracts
+        run: uv run lint-imports
+
+  unit:
+    name: Unit tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: astral-sh/setup-uv@v5
+        with:
+          enable-cache: true
+          cache-dependency-glob: backend/uv.lock
+
+      - name: Install dependencies
+        run: uv sync --group dev --frozen
+
+      - name: Unit tests (no database)
+        run: uv run pytest tests/unit -n 2 -q
+
+  database:
+    name: Database and concurrency tests
+    runs-on: ubuntu-latest
+    # Needs the direct connection string of the Neon "test" branch. Without the secret the
+    # database tests skip themselves (R15.AC4) and this job reports that instead of failing.
+    env:
+      TEST_DATABASE_URL: ${{ secrets.NEON_TEST_DATABASE_URL }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: astral-sh/setup-uv@v5
+        with:
+          enable-cache: true
+          cache-dependency-glob: backend/uv.lock
+
+      - name: Install dependencies
+        run: uv sync --group dev --frozen
+
+      - name: Warn when no Neon test branch is configured
+        if: ${{ env.TEST_DATABASE_URL == '' }}
+        run: |
+          echo "::warning::NEON_TEST_DATABASE_URL is not set — database and concurrency tests will skip."
+
+      # Each worker creates its own uniquely named database on the branch and drops it
+      # afterwards, so parallel runs do not collide.
+      - name: Schema, ledger, invariant and API tests
+        run: uv run pytest tests/ledger tests/invariants tests/api -n 2 -q
+
+      # Threads inside the tests provide the concurrency; pytest itself stays single-process.
+      - name: Concurrency tests
+        run: uv run pytest tests/concurrency -q
