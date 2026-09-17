@@ -58,9 +58,14 @@ def test_skips_when_no_test_branch_is_configured(monkeypatch: pytest.MonkeyPatch
 
 
 def test_env_file_supplies_the_test_url(monkeypatch: pytest.MonkeyPatch) -> None:
-    """The harness reads backend/.env so no variables have to be exported by hand."""
+    """The harness reads backend/.env so no variables have to be exported by hand.
+
+    That file is git-ignored and local-only; in CI the URL comes from a secret instead.
+    """
+    if not conftest.ENV_FILE.exists():
+        pytest.skip("backend/.env is local-only; CI supplies TEST_DATABASE_URL directly")
+
     monkeypatch.delenv(conftest.TEST_URL_VAR, raising=False)
-    assert conftest.ENV_FILE.exists()
     conftest._load_env_file()
     assert os.environ[conftest.TEST_URL_VAR].startswith("postgresql://")
 

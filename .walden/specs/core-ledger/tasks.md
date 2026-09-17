@@ -1,7 +1,7 @@
 ---
 status: approved
 approved_at: 2026-09-17T19:22:16Z
-last_modified: 2026-09-17T20:10:58Z
+last_modified: 2026-09-17T20:12:41Z
 source_design_approved_at: 2026-09-17T19:11:00Z
 ---
 
@@ -155,7 +155,7 @@ loads from `backend/.env` (Neon branch `test`).
       - command: ["sh", "-c", "cd backend && uv run pytest tests/unit tests/ledger tests/invariants tests/api -n 2 -q"]
       - command: ["sh", "-c", "cd backend && uv run pytest tests/concurrency -q"]
 
-- [ ] 7. Continuous integration and first push
+- [x] 7. Continuous integration and first push
   - [x] 7.1 GitHub Actions workflow for the backend gates
     - Requirements: `NFR6`, `R15.AC4`, `C7`
     - Design: Verification Plan; Testing Strategy (Architecture row)
@@ -163,7 +163,7 @@ loads from `backend/.env` (Neon branch `test`).
       - command: ["sh", "-c", "test -f .github/workflows/backend.yml && grep -q lint-imports .github/workflows/backend.yml && grep -q 'tests/unit' .github/workflows/backend.yml"]
         covers: ["R15.AC4"]
       - command: ["sh", "-c", "cd backend && uv run --with pyyaml python -c \"import yaml;yaml.safe_load(open('../.github/workflows/backend.yml'))\""]
-  - [ ] 7.2 Commit the spec, backend and infrastructure and push to GitHub
+  - [x] 7.2 Commit the spec, backend and infrastructure and push to GitHub
     - Requirements: `C6`
     - Design: Overview (spec-driven delivery)
     - Verification:
