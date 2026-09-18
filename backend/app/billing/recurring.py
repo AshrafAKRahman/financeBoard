@@ -75,8 +75,20 @@ def add_months(start: date, months: int) -> date:
     month_index = start.month - 1 + months
     year = start.year + month_index // 12
     month = month_index % 12 + 1
-    last_day = [31, 29 if year % 4 == 0 and (year % 100 != 0 or year % 400 == 0) else 28,
-                31, 30, 31, 30, 31, 31, 30, 31, 30, 31][month - 1]
+    last_day = [
+        31,
+        29 if year % 4 == 0 and (year % 100 != 0 or year % 400 == 0) else 28,
+        31,
+        30,
+        31,
+        30,
+        31,
+        31,
+        30,
+        31,
+        30,
+        31,
+    ][month - 1]
     return date(year, month, min(start.day, last_day))
 
 
@@ -106,9 +118,7 @@ def create_template(
     if not data.name.strip():
         raise DomainError("invoicing.missing_field", "a template needs a name")
     if not 1 <= data.interval_months <= 12:
-        raise DomainError(
-            "invoicing.invalid_interval", "an interval is between 1 and 12 months"
-        )
+        raise DomainError("invoicing.invalid_interval", "an interval is between 1 and 12 months")
     if not data.lines:
         raise DomainError("invoicing.no_lines", "a template needs at least one line")
     get_partner(session, company_id, data.partner_id)

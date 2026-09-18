@@ -25,9 +25,7 @@ class TestInviting:
     def test_invited_user_has_no_password_and_cannot_be_active(
         self, session: Session, mailer: RecordingMailer, unique_email: str
     ) -> None:
-        result = identity.invite_user(
-            session, email=unique_email, name="Ashraf", mailer=mailer
-        )
+        result = identity.invite_user(session, email=unique_email, name="Ashraf", mailer=mailer)
         session.commit()
 
         user = identity.get_user_by_email(session, unique_email)
@@ -86,10 +84,14 @@ class TestInviting:
 
         assert result.delivery_error == "relay unavailable"
         assert result.invitation.is_open
-        actions = session.execute(
-            text("SELECT action FROM audit_log WHERE target_id = :id"),
-            {"id": str(result.invitation.user_id)},
-        ).scalars().all()
+        actions = (
+            session.execute(
+                text("SELECT action FROM audit_log WHERE target_id = :id"),
+                {"id": str(result.invitation.user_id)},
+            )
+            .scalars()
+            .all()
+        )
         assert "invitation.email_failed" in actions
 
     def test_no_token_or_link_reaches_the_audit_log(
@@ -98,10 +100,14 @@ class TestInviting:
         """R11.AC12"""
         result = identity.invite_user(session, email=unique_email, name="Ashraf", mailer=mailer)
         session.commit()
-        logged = session.execute(
-            text("SELECT detail::text FROM audit_log WHERE target_id = :id"),
-            {"id": str(result.invitation.user_id)},
-        ).scalars().all()
+        logged = (
+            session.execute(
+                text("SELECT detail::text FROM audit_log WHERE target_id = :id"),
+                {"id": str(result.invitation.user_id)},
+            )
+            .scalars()
+            .all()
+        )
         assert logged
         raw_token = token_of(result.link)
         assert all(raw_token not in row and "invitations/" not in row for row in logged)
@@ -151,9 +157,7 @@ class TestAccepting:
         result = identity.invite_user(session, email=unique_email, name="Ashraf", mailer=mailer)
         # The table requires expires_at > created_at, so age the whole row.
         session.execute(
-            text(
-                "UPDATE invitation SET created_at = :created, expires_at = :past WHERE id = :id"
-            ),
+            text("UPDATE invitation SET created_at = :created, expires_at = :past WHERE id = :id"),
             {
                 "created": datetime.now(UTC) - timedelta(days=8),
                 "past": datetime.now(UTC) - timedelta(days=1),
@@ -220,10 +224,14 @@ class TestResendAndRevoke:
         identity.accept_invitation(session, token_of(second.link), PASSWORD)
         session.commit()
 
-        actions = session.execute(
-            text("SELECT action FROM audit_log WHERE target_id = :id ORDER BY at"),
-            {"id": str(first.invitation.user_id)},
-        ).scalars().all()
+        actions = (
+            session.execute(
+                text("SELECT action FROM audit_log WHERE target_id = :id ORDER BY at"),
+                {"id": str(first.invitation.user_id)},
+            )
+            .scalars()
+            .all()
+        )
         assert actions == ["invitation.sent", "invitation.resent", "invitation.accepted"]
 
 

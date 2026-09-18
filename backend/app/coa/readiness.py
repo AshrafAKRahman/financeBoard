@@ -63,8 +63,11 @@ def check(session: Session, company_id: UUID) -> Sequence[Finding]:
     for account in accounts:
         if account.is_group and account.id not in children:
             findings.append(
-                Finding("coa.group_without_children", f"{account.code} has no accounts under it",
-                        account.code)
+                Finding(
+                    "coa.group_without_children",
+                    f"{account.code} has no accounts under it",
+                    account.code,
+                )
             )
 
     findings.extend(_currencies_without_rates(session, company_id))

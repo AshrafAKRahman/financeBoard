@@ -77,9 +77,7 @@ def test_only_one_of_two_concurrent_reversals_commits(engine: Engine, session: S
     assert reversals == 1
 
 
-def test_reversals_of_different_entries_run_in_parallel(
-    engine: Engine, session: Session
-) -> None:
+def test_reversals_of_different_entries_run_in_parallel(engine: Engine, session: Session) -> None:
     books = make_books(session)
     originals = [post(session, entry_request(books)) for _ in range(4)]
     session.commit()

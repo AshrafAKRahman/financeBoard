@@ -33,9 +33,7 @@ def _check_detail(detail: dict[str, Any]) -> None:
     for key, value in detail.items():
         lowered = key.lower()
         if any(part in lowered for part in DENIED_KEY_PARTS):
-            raise DomainError(
-                "audit.secret_in_detail", f"audit detail must not carry {key!r}"
-            )
+            raise DomainError("audit.secret_in_detail", f"audit detail must not carry {key!r}")
         if isinstance(value, dict):
             _check_detail(value)
 

@@ -49,8 +49,12 @@ class TestJournals:
         """R10.AC2"""
         response = client.post(
             f"{base}/journals",
-            json={"code": "BNK2", "name": "Second Bank", "type": "bank",
-                  "default_account_id": loaded["1120"]["id"]},
+            json={
+                "code": "BNK2",
+                "name": "Second Bank",
+                "type": "bank",
+                "default_account_id": loaded["1120"]["id"],
+            },
             headers=SAME_ORIGIN,
         )
         assert response.status_code == 201
@@ -64,9 +68,7 @@ class TestJournals:
             headers=SAME_ORIGIN,
         ).json()
 
-        archived = client.post(
-            f"{base}/journals/{created['id']}/archive", headers=SAME_ORIGIN
-        )
+        archived = client.post(f"{base}/journals/{created['id']}/archive", headers=SAME_ORIGIN)
         assert archived.status_code == 200
         assert archived.json()["active"] is False
         assert "TMP" not in {j["code"] for j in client.get(f"{base}/journals").json()}

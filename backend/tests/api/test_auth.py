@@ -86,18 +86,14 @@ class TestSessionCookie:
         sign_in(client, administrator)
         assert client.get("/api/v1/auth/me").status_code == 200
 
-    def test_logging_out_ends_the_session(
-        self, client: TestClient, administrator: Person
-    ) -> None:
+    def test_logging_out_ends_the_session(self, client: TestClient, administrator: Person) -> None:
         """R3.AC7"""
         sign_in(client, administrator)
         logout = client.post("/api/v1/auth/logout", headers={"Origin": str(client.base_url)})
         assert logout.status_code == 204
         assert client.get("/api/v1/auth/me").status_code == 401
 
-    def test_a_tampered_cookie_is_refused(
-        self, client: TestClient, administrator: Person
-    ) -> None:
+    def test_a_tampered_cookie_is_refused(self, client: TestClient, administrator: Person) -> None:
         sign_in(client, administrator)
         client.cookies.set("sid", "not-a-real-session-token")
         response = client.get("/api/v1/auth/me")

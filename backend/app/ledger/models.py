@@ -108,11 +108,13 @@ class LedgerSettings(Base):
             ["fx_loss_account_id", "company_id"], ["account.id", "account.company_id"]
         ),
         ForeignKeyConstraint(
-            ["receivable_account_id", "company_id"], ["account.id", "account.company_id"],
+            ["receivable_account_id", "company_id"],
+            ["account.id", "account.company_id"],
             name="ledger_settings_receivable_fkey",
         ),
         ForeignKeyConstraint(
-            ["payable_account_id", "company_id"], ["account.id", "account.company_id"],
+            ["payable_account_id", "company_id"],
+            ["account.id", "account.company_id"],
             name="ledger_settings_payable_fkey",
         ),
         ForeignKeyConstraint(
@@ -126,7 +128,8 @@ class LedgerSettings(Base):
             name="ledger_settings_outstanding_payments_fkey",
         ),
         ForeignKeyConstraint(
-            ["suspense_account_id", "company_id"], ["account.id", "account.company_id"],
+            ["suspense_account_id", "company_id"],
+            ["account.id", "account.company_id"],
             name="ledger_settings_suspense_fkey",
         ),
     )
@@ -212,6 +215,16 @@ class JournalEntryLine(Base):
         ),
         ForeignKeyConstraint(["account_id", "company_id"], ["account.id", "account.company_id"]),
         Index("journal_entry_line_account", "company_id", "account_id"),
+        # Open amounts (migration 0005): what a posted line on a reconcilable account still
+        # owes or is owed. Maintained by the reconciliation trigger, not by the ORM.
+        UniqueConstraint("id", "company_id", name="journal_entry_line_id_company_key"),
+        Index(
+            "journal_entry_line_open",
+            "company_id",
+            "account_id",
+            "partner_id",
+            postgresql_where=text("residual IS NOT NULL AND NOT reconciled"),
+        ),
     )
 
     id: Mapped[UUID] = mapped_column(primary_key=True)
@@ -230,6 +243,9 @@ class JournalEntryLine(Base):
     tax_grid_tag: Mapped[str | None]
     x_data: Mapped[dict[str, Any]] = mapped_column(server_default="{}")
     created_at: Mapped[datetime] = mapped_column(server_default=func.now())
+    residual: Mapped[Decimal | None]
+    residual_currency: Mapped[Decimal | None]
+    reconciled: Mapped[bool] = mapped_column(server_default="false")
 
     entry: Mapped[JournalEntry] = relationship(
         back_populates="lines",

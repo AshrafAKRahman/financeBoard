@@ -117,9 +117,7 @@ def list_documents(
         query = query.where(Document.date >= since)
     if until:
         query = query.where(Document.date <= until)
-    query = query.order_by(Document.date.desc(), Document.created_at.desc()).limit(
-        min(limit, 500)
-    )
+    query = query.order_by(Document.date.desc(), Document.created_at.desc()).limit(min(limit, 500))
     return session.execute(query).scalars().all()
 
 
@@ -157,9 +155,7 @@ def _validate_line(session: Session, company_id: UUID, line: LineData) -> None:
     if not line.description.strip():
         raise DomainError("invoicing.invalid_line", "a line needs a description")
     if line.quantity < 0 or line.unit_price < 0:
-        raise DomainError(
-            "invoicing.invalid_line", "quantity and unit price cannot be negative"
-        )
+        raise DomainError("invoicing.invalid_line", "quantity and unit price cannot be negative")
     if line.discount_percent < 0 or line.discount_percent > 100:
         raise DomainError("invoicing.invalid_line", "a discount is between 0 and 100 percent")
     try:
@@ -194,9 +190,7 @@ def _write_lines(
         session.flush()
         for tax_id in dict.fromkeys(line.tax_ids):
             get_tax(session, company_id, tax_id)  # refuses another company's tax
-            session.add(
-                DocumentLineTax(line_id=row.id, tax_id=tax_id, company_id=company_id)
-            )
+            session.add(DocumentLineTax(line_id=row.id, tax_id=tax_id, company_id=company_id))
     session.flush()
 
 
@@ -208,9 +202,7 @@ def create_document(
     get_partner(session, company_id, data.partner_id)
 
     journal = session.execute(
-        select(Journal).where(
-            Journal.id == data.journal_id, Journal.company_id == company_id
-        )
+        select(Journal).where(Journal.id == data.journal_id, Journal.company_id == company_id)
     ).scalar_one_or_none()
     if journal is None:
         raise DomainError("invoicing.journal_not_found", f"journal {data.journal_id} not found")

@@ -97,9 +97,12 @@ class TestBalanceAtCommit:
             post(connection, entry_id, "MISC/2026/00100")
 
         with engine.connect() as connection:
-            assert connection.execute(
-                text("SELECT state FROM journal_entry WHERE id = :id"), {"id": entry_id}
-            ).scalar() == "posted"
+            assert (
+                connection.execute(
+                    text("SELECT state FROM journal_entry WHERE id = :id"), {"id": entry_id}
+                ).scalar()
+                == "posted"
+            )
 
     def test_debits_must_equal_credits(self, engine: Engine, books: Books) -> None:
         """R3.AC1 — the check fires at COMMIT, not at INSERT."""
@@ -167,10 +170,13 @@ class TestBalanceAtCommit:
             post(connection, entry_id, "MISC/2026/00103")
 
         with engine.connect() as connection:
-            assert connection.execute(
-                text("SELECT count(*) FROM journal_entry_line WHERE entry_id = :e"),
-                {"e": entry_id},
-            ).scalar() == 2
+            assert (
+                connection.execute(
+                    text("SELECT count(*) FROM journal_entry_line WHERE entry_id = :e"),
+                    {"e": entry_id},
+                ).scalar()
+                == 2
+            )
 
     def test_a_posted_entry_needs_lines(self, engine: Engine, books: Books) -> None:
         with rejects("ledger.empty_entry"), engine.begin() as connection:
@@ -191,9 +197,12 @@ class TestBalanceAtCommit:
             add_line(connection, books, entry_id, "expense", debit="100.00", line_no=1)
 
         with engine.connect() as connection:
-            assert connection.execute(
-                text("SELECT state FROM journal_entry WHERE id = :id"), {"id": entry_id}
-            ).scalar() == "draft"
+            assert (
+                connection.execute(
+                    text("SELECT state FROM journal_entry WHERE id = :id"), {"id": entry_id}
+                ).scalar()
+                == "draft"
+            )
 
 
 class TestLineLevelRules:
@@ -300,7 +309,10 @@ class TestLineLevelRules:
             post(connection, entry_id, "MISC/2026/00106")
 
         with engine.connect() as connection:
-            assert connection.execute(
-                text("SELECT sum(amount_currency) FROM journal_entry_line WHERE entry_id = :e"),
-                {"e": entry_id},
-            ).scalar() == 0
+            assert (
+                connection.execute(
+                    text("SELECT sum(amount_currency) FROM journal_entry_line WHERE entry_id = :e"),
+                    {"e": entry_id},
+                ).scalar()
+                == 0
+            )

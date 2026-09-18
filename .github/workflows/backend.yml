@@ -37,6 +37,9 @@ jobs:
       - name: Ruff
         run: uv run ruff check .
 
+      - name: Formatting
+        run: uv run ruff format --check .
+
       - name: Architecture contracts
         run: uv run lint-imports
 

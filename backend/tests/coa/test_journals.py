@@ -174,8 +174,6 @@ def test_a_default_account_from_another_company_is_refused(
     session.commit()
 
     with pytest.raises(DomainError) as error:
-        make_journal(
-            session, books.company_id, "BNK9", type="bank", default_account_id=theirs.id
-        )
+        make_journal(session, books.company_id, "BNK9", type="bank", default_account_id=theirs.id)
     assert error.value.code == "coa.account_not_found"
     session.rollback()

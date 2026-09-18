@@ -259,9 +259,7 @@ def delete_account(
 
 @router.get("/journals", response_model=list[JournalOut], dependencies=[requires("journal:read")])
 @needs("journal:read")
-def list_journals(
-    company_id: UUID, session: SessionDep, include_archived: bool = False
-) -> list:
+def list_journals(company_id: UUID, session: SessionDep, include_archived: bool = False) -> list:
     return list(
         journals_service.list_journals(session, company_id, include_archived=include_archived)
     )
@@ -274,9 +272,7 @@ def list_journals(
     dependencies=[requires("journal:manage")],
 )
 @needs("journal:manage")
-def create_journal(
-    company_id: UUID, body: JournalIn, caller: CallerDep, session: SessionDep
-):
+def create_journal(company_id: UUID, body: JournalIn, caller: CallerDep, session: SessionDep):
     return journals_service.create_journal(
         session,
         company_id,
@@ -309,9 +305,7 @@ def update_journal(
     dependencies=[requires("journal:manage")],
 )
 @needs("journal:manage")
-def archive_journal(
-    company_id: UUID, journal_id: UUID, caller: CallerDep, session: SessionDep
-):
+def archive_journal(company_id: UUID, journal_id: UUID, caller: CallerDep, session: SessionDep):
     return journals_service.archive_journal(session, company_id, journal_id, actor=_actor(caller))
 
 
@@ -381,9 +375,7 @@ def load_template(
 # ----------------------------------------------------------------------------- rates
 
 
-@router.get(
-    "/exchange-rates", response_model=list[RateOut], dependencies=[requires("rate:read")]
-)
+@router.get("/exchange-rates", response_model=list[RateOut], dependencies=[requires("rate:read")])
 @needs("rate:read")
 def list_rates(company_id: UUID, session: SessionDep, currency_code: str | None = None) -> list:
     return list(rates_service.list_rates(session, company_id, currency_code))

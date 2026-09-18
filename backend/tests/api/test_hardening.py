@@ -17,9 +17,7 @@ pytestmark = pytest.mark.db
 SECRET_MARKERS = ("password_hash", "token_hash", "$argon2", "sid=")
 
 
-def test_sign_in_failures_are_indistinguishable(
-    client: TestClient, administrator: Person
-) -> None:
+def test_sign_in_failures_are_indistinguishable(client: TestClient, administrator: Person) -> None:
     """R3.AC3 — same status, same body, for a wrong password and an unknown address."""
     wrong_password = client.post(
         "/api/v1/auth/login",
@@ -121,9 +119,7 @@ def test_protected_routes_refuse_anonymous_callers(client: TestClient) -> None:
         assert response.status_code == 401, f"{path} answered {response.status_code}"
 
 
-def test_cookies_are_http_only_and_same_site(
-    client: TestClient, administrator: Person
-) -> None:
+def test_cookies_are_http_only_and_same_site(client: TestClient, administrator: Person) -> None:
     """NFR1 — the cookie flags are the browser-side half of the protection."""
     response = client.post(
         "/api/v1/auth/login",

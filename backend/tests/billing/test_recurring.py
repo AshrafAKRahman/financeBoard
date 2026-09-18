@@ -185,7 +185,5 @@ def test_a_template_can_be_changed(session: Session, books, customer, vat15) -> 
         (date(2026, 3, 15), 12, date(2027, 3, 15)),
     ],
 )
-def test_month_arithmetic_handles_short_months(
-    start: date, months: int, expected: date
-) -> None:
+def test_month_arithmetic_handles_short_months(start: date, months: int, expected: date) -> None:
     assert add_months(start, months) == expected

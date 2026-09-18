@@ -30,3 +30,13 @@ Review this file before non-trivial work when the current request matches past m
 - Lesson: Treated the start-up catalogue sync as sufficient, so 'migrate then run tests' produced a database that did not match the code
 - Guardrail: When adding a permission or other reference data, seed it in the migration as well as the code sync, so a migrated database is complete on its own
 
+### 2026-09-18T14:53:29Z | payments-and-reconciliation | design
+- Trigger: Design claimed the ledger's line guard already allowed residual updates on posted lines; reading 0001 showed it refuses every update
+- Lesson: A design that builds on another feature's trigger must quote the trigger's actual text, not its remembered intent
+- Guardrail: Before designing on top of an existing database guard, read its function body in the migration and paste the relevant branch into the design
+
+### 2026-09-18T15:50:52Z | payments-and-reconciliation | execute
+- Trigger: A statement line reconciled, undone and reconciled again hit the core ledger's journal_entry_one_per_source unique index
+- Lesson: An entry's source is a claim that the source document causes exactly one entry for ever; anything that can be undone and redone cannot use it
+- Guardrail: Before setting source_type/source_id on a posted entry, check whether the feature allows the action to be undone and repeated; if it does, link from the source row instead
+

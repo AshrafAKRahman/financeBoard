@@ -94,9 +94,7 @@ class TestPartnersAndTaxes:
         assert customer_id in {partner["id"] for partner in listed}
         assert listed[0]["vat_number"] == "310000000000003"
 
-    def test_a_bad_vat_number_is_refused_with_its_code(
-        self, client: TestClient, base: str
-    ) -> None:
+    def test_a_bad_vat_number_is_refused_with_its_code(self, client: TestClient, base: str) -> None:
         response = client.post(
             f"{base}/partners",
             json={"name": "Wrong", "type": "customer", "vat_number": "12345"},
@@ -192,9 +190,10 @@ class TestDocuments:
         assert patched.status_code == 200
         assert patched.json()["narration"] == "March consulting"
 
-        assert client.delete(
-            f"{base}/documents/{created['id']}", headers=SAME_ORIGIN
-        ).status_code == 204
+        assert (
+            client.delete(f"{base}/documents/{created['id']}", headers=SAME_ORIGIN).status_code
+            == 204
+        )
         assert client.get(f"{base}/documents/{created['id']}").status_code == 404
 
     def test_posting_numbers_it_and_returns_the_entry(
@@ -234,9 +233,7 @@ class TestDocuments:
         ).json()
         client.post(f"{base}/documents/{first['id']}/post", headers=SAME_ORIGIN)
 
-        note = client.post(
-            f"{base}/documents/{first['id']}/credit-note", headers=SAME_ORIGIN
-        )
+        note = client.post(f"{base}/documents/{first['id']}/credit-note", headers=SAME_ORIGIN)
         assert note.status_code == 201
         assert note.json()["type"] == "out_credit"
         assert note.json()["origin_document_id"] == first["id"]
@@ -328,9 +325,7 @@ class TestPermissions:
         )
         assert created.status_code == 201
 
-        refused = client.post(
-            f"{base}/documents/{created.json()['id']}/post", headers=SAME_ORIGIN
-        )
+        refused = client.post(f"{base}/documents/{created.json()['id']}/post", headers=SAME_ORIGIN)
         assert refused.status_code == 403
 
 
@@ -408,7 +403,11 @@ class TestRecurring:
 
 
 def test_changes_are_audited(
-    client: TestClient, session: Session, base: str, billing_company: Company, context: dict,
+    client: TestClient,
+    session: Session,
+    base: str,
+    billing_company: Company,
+    context: dict,
     customer_id: str,
 ) -> None:
     """R11.AC3"""

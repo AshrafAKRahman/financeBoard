@@ -362,7 +362,9 @@ def list_partners(
 @needs("partner:manage")
 def create_partner(company_id: UUID, body: PartnerIn, caller: CallerDep, session: SessionDep):
     return partners_service.create_partner(
-        session, company_id, partners_service.PartnerData(**body.model_dump()),
+        session,
+        company_id,
+        partners_service.PartnerData(**body.model_dump()),
         actor=_actor(caller),
     )
 
@@ -387,12 +389,8 @@ def update_partner(
     dependencies=[requires("partner:manage")],
 )
 @needs("partner:manage")
-def archive_partner(
-    company_id: UUID, partner_id: UUID, caller: CallerDep, session: SessionDep
-):
-    return partners_service.archive_partner(
-        session, company_id, partner_id, actor=_actor(caller)
-    )
+def archive_partner(company_id: UUID, partner_id: UUID, caller: CallerDep, session: SessionDep):
+    return partners_service.archive_partner(session, company_id, partner_id, actor=_actor(caller))
 
 
 # ------------------------------------------------------------------------------ taxes
@@ -649,9 +647,7 @@ def update_template(
     dependencies=[requires("invoice:manage")],
 )
 @needs("invoice:manage")
-def pause_template(
-    company_id: UUID, template_id: UUID, caller: CallerDep, session: SessionDep
-):
+def pause_template(company_id: UUID, template_id: UUID, caller: CallerDep, session: SessionDep):
     return recurring_service.set_active(
         session, company_id, template_id, False, actor=_actor(caller)
     )
@@ -663,9 +659,7 @@ def pause_template(
     dependencies=[requires("invoice:manage")],
 )
 @needs("invoice:manage")
-def resume_template(
-    company_id: UUID, template_id: UUID, caller: CallerDep, session: SessionDep
-):
+def resume_template(company_id: UUID, template_id: UUID, caller: CallerDep, session: SessionDep):
     return recurring_service.set_active(
         session, company_id, template_id, True, actor=_actor(caller)
     )

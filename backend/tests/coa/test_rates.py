@@ -68,9 +68,7 @@ def test_rates_come_back_in_date_order(session: Session, books: Books) -> None:
     assert dates == [1, 3, 5]
 
 
-def test_rates_are_scoped_to_one_company(
-    session: Session, books: Books, empty_company
-) -> None:
+def test_rates_are_scoped_to_one_company(session: Session, books: Books, empty_company) -> None:
     set_rate(session, books.company_id, "USD", date(2026, 3, 1), Decimal("3.75"))
     session.commit()
     assert list_rates(session, empty_company.id, "USD") == []

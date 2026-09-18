@@ -26,9 +26,7 @@ def age_session(session: Session, session_id, *, last_used=None, expires=None) -
     if expires is not None:
         updates.append("expires_at = :expires")
         params["expires"] = expires
-    session.execute(
-        text(f"UPDATE user_session SET {', '.join(updates)} WHERE id = :id"), params
-    )
+    session.execute(text(f"UPDATE user_session SET {', '.join(updates)} WHERE id = :id"), params)
     session.commit()
     session.expire_all()
 

@@ -194,9 +194,12 @@ class TestAuditLogIsAppendOnly:
         with engine.begin() as connection:
             record_id = self.write_record(connection)
         with engine.connect() as connection:
-            assert connection.execute(
-                text("SELECT action FROM audit_log WHERE id = :id"), {"id": record_id}
-            ).scalar_one() == "test.event"
+            assert (
+                connection.execute(
+                    text("SELECT action FROM audit_log WHERE id = :id"), {"id": record_id}
+                ).scalar_one()
+                == "test.event"
+            )
 
     def test_records_cannot_be_changed(self, engine: Engine) -> None:
         with engine.begin() as connection:

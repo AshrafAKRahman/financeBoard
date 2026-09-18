@@ -102,9 +102,7 @@ def test_permissions_are_checked_per_company(
     other = Company(id=uuid7(), name="Elsewhere", base_currency="SAR")
     session.add(other)
     session.flush()
-    grant_role(
-        session, user_id=bystander.user_id, company_id=company.id, role_id=reader_role.id
-    )
+    grant_role(session, user_id=bystander.user_id, company_id=company.id, role_id=reader_role.id)
     session.commit()
 
     sign_in(client, bystander)

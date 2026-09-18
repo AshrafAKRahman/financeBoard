@@ -122,9 +122,7 @@ def resend_invitation(
     invitation.superseded_at = now()
     session.flush()
     user = get_user(session, invitation.user_id)
-    return _issue_invitation(
-        session, user, actor=actor, mailer=mailer, action="invitation.resent"
-    )
+    return _issue_invitation(session, user, actor=actor, mailer=mailer, action="invitation.resent")
 
 
 def revoke_invitation(
@@ -256,9 +254,7 @@ def recent_failures(session: Session, email: str) -> int:
 
 
 def _record_attempt(session: Session, email: str, *, succeeded: bool, ip: str | None) -> None:
-    session.add(
-        LoginAttempt(id=uuid7(), email=email, succeeded=succeeded, ip=clean_ip(ip))
-    )
+    session.add(LoginAttempt(id=uuid7(), email=email, succeeded=succeeded, ip=clean_ip(ip)))
     if succeeded:
         # A success clears the failure count for that address (R3.AC6).
         session.execute(
@@ -273,9 +269,7 @@ def _record_attempt(session: Session, email: str, *, succeeded: bool, ip: str | 
     session.flush()
 
 
-def authenticate(
-    session: Session, email: str, password: str, *, ip: str | None = None
-) -> AppUser:
+def authenticate(session: Session, email: str, password: str, *, ip: str | None = None) -> AppUser:
     """One answer for every failure, and the same work either way (R3.AC3, R3.AC8)."""
     address = email.strip().lower()
     settings = get_settings()

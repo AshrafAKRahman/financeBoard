@@ -160,9 +160,7 @@ def update_journal(
         journal.name = name
 
     if "default_account_id" in changes:
-        _check_default_account(
-            session, company_id, journal.type, changes["default_account_id"]
-        )
+        _check_default_account(session, company_id, journal.type, changes["default_account_id"])
         journal.default_account_id = changes["default_account_id"]
 
     journal.updated_at = datetime.now(UTC)

@@ -75,9 +75,7 @@ def test_a_password_is_generated_and_shown_once(fresh_session: Session) -> None:
 
     assert result.generated_password
     assert len(result.generated_password) >= 12
-    assert identity.authenticate(
-        fresh_session, "owner@example.sa", result.generated_password
-    )
+    assert identity.authenticate(fresh_session, "owner@example.sa", result.generated_password)
     fresh_session.commit()
 
 
@@ -100,9 +98,10 @@ def test_the_password_never_reaches_the_audit_log(fresh_session: Session) -> Non
     logged = fresh_session.execute(text("SELECT detail::text FROM audit_log")).scalars().all()
     assert logged
     assert all(result.generated_password not in row for row in logged)
-    assert any(action == "system.bootstrapped" for action in fresh_session.execute(
-        text("SELECT action FROM audit_log")
-    ).scalars())
+    assert any(
+        action == "system.bootstrapped"
+        for action in fresh_session.execute(text("SELECT action FROM audit_log")).scalars()
+    )
 
 
 def test_a_short_password_is_refused(fresh_session: Session) -> None:

@@ -213,9 +213,7 @@ class TestLockout:
         session.commit()
 
 
-def test_sign_ins_are_audited(
-    session: Session, mailer: RecordingMailer, unique_email: str
-) -> None:
+def test_sign_ins_are_audited(session: Session, mailer: RecordingMailer, unique_email: str) -> None:
     """R8.AC1 — success and failure both leave a record."""
     invite_and_accept(session, mailer, unique_email)
     with pytest.raises(DomainError):
