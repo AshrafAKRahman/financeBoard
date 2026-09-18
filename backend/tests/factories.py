@@ -308,6 +308,7 @@ def make_small_billing_company(session: Session):
 TREASURY_CHART = [
     # code, name, type, subtype
     ("1110", "Bank Current Account", "asset", "bank_cash"),
+    ("1115", "Petty Cash", "asset", "bank_cash"),
     ("1120", "Outstanding Receipts", "asset", "current_asset"),
     ("1200", "Trade Receivables", "asset", "receivable"),
     ("1300", "VAT Input", "asset", "current_asset"),

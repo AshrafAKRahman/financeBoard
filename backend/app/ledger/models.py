@@ -215,6 +215,12 @@ class JournalEntryLine(Base):
         ),
         ForeignKeyConstraint(["account_id", "company_id"], ["account.id", "account.company_id"]),
         Index("journal_entry_line_account", "company_id", "account_id"),
+        Index(
+            "journal_entry_line_tax_grid",
+            "company_id",
+            "tax_grid_tag",
+            postgresql_where=text("tax_grid_tag IS NOT NULL"),
+        ),
         # Open amounts (migration 0005): what a posted line on a reconcilable account still
         # owes or is owed. Maintained by the reconciliation trigger, not by the ORM.
         UniqueConstraint("id", "company_id", name="journal_entry_line_id_company_key"),
@@ -241,6 +247,8 @@ class JournalEntryLine(Base):
     due_date: Mapped[date | None]
     tax_id: Mapped[UUID | None]
     tax_grid_tag: Mapped[str | None]
+    tax_base: Mapped[Decimal | None]
+    """What the tax was charged on (migration 0006), so a VAT return needs no documents."""
     x_data: Mapped[dict[str, Any]] = mapped_column(server_default="{}")
     created_at: Mapped[datetime] = mapped_column(server_default=func.now())
     residual: Mapped[Decimal | None]

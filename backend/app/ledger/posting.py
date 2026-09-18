@@ -42,6 +42,10 @@ class PostingLine:
     due_date: date | None = None
     tax_id: UUID | None = None
     tax_grid_tag: str | None = None
+    tax_base: Decimal | None = None
+    """What this tax was charged on. A VAT return reports the basis as well as the tax, and
+    it has to come from the ledger rather than from the document beside it."""
+
     open_item: bool = True
     """False for a line that settles an account rather than opening something on it.
 
@@ -78,6 +82,7 @@ class LineValues:
     due_date: date | None = None
     tax_id: UUID | None = None
     tax_grid_tag: str | None = None
+    tax_base: Decimal | None = None
     open_item: bool = True
 
 
@@ -138,6 +143,7 @@ def convert_lines(
                 due_date=line.due_date,
                 tax_id=line.tax_id,
                 tax_grid_tag=line.tax_grid_tag,
+                tax_base=line.tax_base,
                 open_item=line.open_item,
             )
         )
@@ -240,6 +246,9 @@ def reverse(
             due_date=line.due_date,
             tax_id=line.tax_id,
             tax_grid_tag=line.tax_grid_tag,
+            # A reversal carries the same basis, so a reversed sale leaves the VAT return
+            # net of itself rather than reporting the supply twice.
+            tax_base=line.tax_base,
             # A reversal of a correction is a correction: it opens nothing either.
             open_item=line.residual is not None,
         )
@@ -307,6 +316,7 @@ def _create_posted_entry(
                 due_date=v.due_date,
                 tax_id=v.tax_id,
                 tax_grid_tag=v.tax_grid_tag,
+                tax_base=v.tax_base,
                 residual=(abs(v.debit - v.credit) if _keeps_open_item(v, open_items) else None),
                 residual_currency=(
                     abs(v.amount_currency) if _keeps_open_item(v, open_items) else None

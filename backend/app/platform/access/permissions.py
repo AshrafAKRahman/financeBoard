@@ -30,6 +30,7 @@ PERMISSIONS: dict[str, str] = {
     "payment:post": "Post, cancel, match and reconcile",
     "statement:read": "See imported bank statements",
     "statement:import": "Import bank statement files",
+    "report:read": "Read the financial reports",
 }
 
 CODES = frozenset(PERMISSIONS)
