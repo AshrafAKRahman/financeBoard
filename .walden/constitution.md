@@ -10,10 +10,10 @@ double-entry accounting. The **ledger is the only source of truth**: every finan
 document posts exactly one journal entry, and every report reads posted journal entries
 only. Delivered in four phases; Phase 1 is the core finance MVP (ledger, chart of accounts,
 multi-currency, invoicing, VAT + ZATCA e-invoicing, payments and reconciliation, reports,
-multi-company).
+multi-company, CSV export, the Phase 1 screens, and document capture).
 
 Sources of truth: `finance-erp-mvp-prompt.md` (brief) and `docs/architecture.md`
-(architecture and decisions D1–D12).
+(architecture and decisions D1–D15).
 
 ## Tech Stack
 
@@ -55,7 +55,7 @@ TEST_DATABASE_URL=<neon direct url> uv run pytest -n 2
 ## Key Files
 
 - `finance-erp-mvp-prompt.md` — product brief and phase plan
-- `docs/architecture.md` — architecture, data model, decisions D1–D12
+- `docs/architecture.md` — architecture, data model, decisions D1–D15
 - `backend/pyproject.toml` — dependencies, pytest, ruff, import-linter contracts
 - `backend/migrations/versions/` — schema and invariant triggers
 - `backend/app/db.py` — engines, Neon pooled vs direct, unit of work
@@ -68,6 +68,12 @@ TEST_DATABASE_URL=<neon direct url> uv run pytest -n 2
   entries are immutable, corrections only via reversal entries, no posting on or before
   the company lock date.
 - No report reads anything except posted journal entries.
+- **Extracted data is never posted.** Reading a receipt's QR code or running a document
+  through a vision model produces a draft for a person to confirm. Nothing reaches the
+  ledger because a model was confident (D14).
+- **Whoever may read a list may export it.** Exports add no permission of their own, obey
+  the same company scoping and filters as the screen they came from, and are recorded in
+  the audit log (D13).
 - No floats for money.
 - Statutory rates (VAT, withholding, GOSI, EOSB) are effective-dated data, never constants.
 - ZATCA-issued invoices are immutable once cleared/reported; corrections via credit/debit notes.

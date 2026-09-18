@@ -1,6 +1,6 @@
 # Finance ERP — Architecture
 
-Status: **All decisions D1–D12 made; Phase 1 build in progress** · Scope: Phase 1 in detail, Phases 2–4 as boundaries and
+Status: **All decisions D1–D15 made; Phase 1 build in progress** · Scope: Phase 1 in detail, Phases 2–4 as boundaries and
 extension points · Source brief: [`../finance-erp-mvp-prompt.md`](../finance-erp-mvp-prompt.md)
 
 Decision log: see §14. Dependencies in §2 approved.
@@ -96,7 +96,7 @@ flowchart LR
 | `platform.audit` | 1 | append-only audit log |
 | `platform.sequence` | 1 | gapless document numbering |
 | `platform.jobs` | 1 | outbox, job definitions, schedules |
-| `platform.files` | 1 | attachments, immutable archives |
+| `platform.files` | 1 | attachments, immutable archives — the prerequisite for `capture` |
 | `platform.extension` | 1 (fields) / 3 (Studio) | field/model metadata, `x_data` storage, automations |
 | `ledger` | 1 | currencies, rates, accounts, journals, entries, lines, posting, reversal |
 | `partners` | 1 | customers, vendors, addresses, VAT/CR numbers |
@@ -114,6 +114,8 @@ open items and `exchange` works out realised differences. The provider adapters 
 (Moyasar, Geidea, bank feeds) will call `match_lines` and `reconcile_line` rather than
 replace them.
 | `reporting` | 1 | financial reports, VAT return, dashboards (2), Zakat (2) |
+| `export` | 1 | CSV of any list or report, streamed (D13) |
+| `capture` | 1 | attachments, ZATCA QR extraction, vision fallback, draft bills (D14) |
 | `approvals` | 2 | approval rules, requests, steps |
 | `inventory` | 2 | products, locations, stock moves, valuation layers |
 | `pos` | 3 (online) / 4 (offline) | registers, sessions, orders, terminals |
@@ -726,6 +728,9 @@ any time, and a nightly job compares it with raw lines and alerts on any differe
 | D10 | Hosting | ✅ **Decided:** **Railway** for development, demos and ZATCA sandbox work now; **Alibaba Cloud (Saudi region)** for production later. See §17. |
 | D11 | Record retention | ✅ **Decided:** Keep ZATCA XML and ledger data for the statutory retention period (verify current VAT and Zakat retention rules); no hard deletes of posted data ever. |
 | D12 | Database service (pre-production) | ✅ **Decided:** **Neon** Postgres, nothing database-related on the local machine. Production database moves to Alibaba ApsaraDB with the rest of the stack. See §17.2. |
+| D13 | Getting data out of the system | ✅ **Decided:** **CSV on every list**, not only on reports. Exports are their own endpoint family (`/exports/...`) so the already-approved list contracts stay untouched; each one reuses the read permission of the resource it exports, applies the same company scoping and the same filters as the screen, streams rather than buffers, and appends an audit record. Excel and PDF are deliberately not in Phase 1: a CSV opens in Excel, and a PDF of a report is a printing concern that belongs with the invoice PDF work. |
+| D14 | Reading a receipt or an invoice | ✅ **Decided:** **ZATCA QR first, vision model second.** A Saudi simplified invoice carries seller name, VAT number, timestamp, total and VAT amount in a base64 TLV payload inside its QR code — exact figures, no confidence score, and they can be checked against the seller's VAT number we already hold. A vision model handles foreign or non-compliant documents and the line detail a QR never carries. Either way the result is a **draft** a person confirms; nothing posts because a model was sure. QR decoding library to be chosen at spec time (`zxing-cpp` and `opencv-python-headless` are the candidates — both ship wheels, neither needs a system library). |
+| D15 | When the frontend is built | ✅ **Decided:** **After the reporting API, before document capture.** The reports are what make screens worth having, and capture needs a review screen to be safe. The frontend is now an explicit Phase 1 deliverable (brief item 10), not an implication of the i18n requirement. |
 
 ---
 

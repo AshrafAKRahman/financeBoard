@@ -51,7 +51,9 @@ effective-dated configuration and verify current values against official sources
 
 ## Phase 1 — Core finance MVP (ledger-first)
 
-Do not start with invoicing UI or dashboards. Build in this order:
+Do not start with invoicing UI or dashboards — the ledger and the documents that post
+into it come first, and the screens come once there is something correct to show. Build in
+this order:
 
 1. **Core ledger engine**: `accounts`, `journals`, `journal_entries`,
    `journal_entry_lines`. Enforce double-entry invariants at the data layer, not
@@ -81,7 +83,28 @@ Do not start with invoicing UI or dashboards. Build in this order:
    that's a bug.
 8. **Multi-company**: company as a first-class entity; every record scoped to a
    company.
-9. **Foundations for later phases** (designed now, built minimally):
+9. **Data export**: every list a person can read, they can also take away as CSV —
+   invoices, bills, payments, journal entries, statement lines, open items and every
+   report. Exporting needs no new permission: whoever may read the list may export it,
+   and the export obeys the same company scoping and filters as the screen it came
+   from. An export is recorded in the audit log, because a file of customer data
+   leaving the system is worth knowing about.
+10. **Frontend — Phase 1 screens**: the ERP is not delivered until a person can use it
+   without curl. Chart of accounts, partners, invoices and bills, payments, the
+   matching screen, bank reconciliation, and the reports with basic charts (revenue
+   over time, receivables ageing). Arabic/English and RTL from the first screen, not
+   retrofitted. Money is formatted, never recomputed, in the browser.
+11. **Document capture**: attach the source document to what it records, and stop
+   retyping it.
+   - Attachments on any document, stored in object storage, never in the database.
+   - **Saudi receipts and simplified invoices are read from their ZATCA QR code**,
+     which carries seller name, VAT number, timestamp, total and VAT amount as
+     TLV-encoded fields. That is exact data, not a guess, and it is the primary path.
+   - A vision model is the fallback for foreign and non-compliant documents, and for
+     the line detail a QR does not carry.
+   - Extraction always produces a **draft** for a person to confirm before it posts.
+     Nothing reaches the ledger because a model was confident.
+12. **Foundations for later phases** (designed now, built minimally):
    - Role-based permissions model with company scoping (single admin role is
      acceptable for Phase 1 UI, but every API goes through the permission layer).
    - Document state machine with a pluggable "to approve" hook.

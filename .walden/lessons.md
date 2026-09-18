@@ -40,3 +40,8 @@ Review this file before non-trivial work when the current request matches past m
 - Lesson: An entry's source is a claim that the source document causes exactly one entry for ever; anything that can be undone and redone cannot use it
 - Guardrail: Before setting source_type/source_id on a posted entry, check whether the feature allows the action to be undone and repeated; if it does, link from the source row instead
 
+### 2026-09-18T18:22:37Z | financial-reports | requirements
+- Trigger: The user asked whether there would be an interface to upload receipts, export CSV and see graphs; the brief named reporting and dashboards but never named the frontend, exports or document capture as deliverables
+- Lesson: A phased brief can specify every engine and still omit the things a user reaches for first — the screen, getting data out, and getting data in from paper
+- Guardrail: When a brief is organised by phase, check each phase names its user-facing deliverable and its data in/out paths, not only its engine; a phase whose only output is an API is not shippable to a person
+
