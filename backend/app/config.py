@@ -10,9 +10,11 @@ class Settings(BaseSettings):
     app_env: Literal["dev", "test", "staging", "production"] = "dev"
 
     # Neon pooled endpoint (host contains "-pooler"): API requests.
-    database_url: str
+    # Empty is allowed so that unit tests and tooling can import the settings without a
+    # database; asking for an engine without a URL fails with a clear message instead.
+    database_url: str = ""
     # Neon direct endpoint: migrations, job worker, concurrency tests.
-    database_url_direct: str
+    database_url_direct: str = ""
 
     # Where this deployment is reachable; used for invitation links and the origin check.
     public_base_url: str = "http://localhost:5173"
