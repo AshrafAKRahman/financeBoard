@@ -35,9 +35,17 @@ def test_an_expired_session_is_401(
     from sqlalchemy import text
 
     sign_in(client, administrator)
+    # The table requires expires_at > created_at, so age the whole row.
     session.execute(
-        text("UPDATE user_session SET expires_at = :past WHERE user_id = :user"),
-        {"past": datetime.now(UTC) - timedelta(seconds=1), "user": administrator.user_id},
+        text(
+            "UPDATE user_session SET created_at = :created, expires_at = :past "
+            "WHERE user_id = :user"
+        ),
+        {
+            "created": datetime.now(UTC) - timedelta(days=8),
+            "past": datetime.now(UTC) - timedelta(days=1),
+            "user": administrator.user_id,
+        },
     )
     session.commit()
 
