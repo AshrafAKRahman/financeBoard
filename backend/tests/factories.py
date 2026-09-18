@@ -155,6 +155,7 @@ def mark_posted(connection: Connection, entry_id: UUID, number: str = "MISC/2026
         {"id": entry_id, "number": number},
     )
 
+
 def insert_line(
     connection: Connection,
     books: Books,
@@ -198,9 +199,7 @@ def make_billing_company(session: Session):
     from app.coa.templates import load_template
     from app.ledger.api import LedgerSettings
 
-    company = Company(
-        id=uuid7(), name="Riyadh Trading", base_currency="SAR", vat_number="3" * 15
-    )
+    company = Company(id=uuid7(), name="Riyadh Trading", base_currency="SAR", vat_number="3" * 15)
     session.add(company)
     session.flush()
     session.add(LedgerSettings(company_id=company.id))
@@ -304,3 +303,119 @@ def make_small_billing_company(session: Session):
     )
     session.commit()
     return company
+
+
+TREASURY_CHART = [
+    # code, name, type, subtype
+    ("1110", "Bank Current Account", "asset", "bank_cash"),
+    ("1120", "Outstanding Receipts", "asset", "current_asset"),
+    ("1200", "Trade Receivables", "asset", "receivable"),
+    ("1300", "VAT Input", "asset", "current_asset"),
+    ("2100", "Trade Payables", "liability", "payable"),
+    ("2120", "Outstanding Payments", "liability", "current_liability"),
+    ("2200", "VAT Output", "liability", "current_liability"),
+    ("2300", "Withholding Tax Payable", "liability", "current_liability"),
+    ("4100", "Sales Revenue", "income", "income"),
+    ("4900", "Exchange Gain", "income", "other_income"),
+    ("5300", "Rent", "expense", "expense"),
+    ("5800", "Exchange Loss", "expense", "expense"),
+    ("5900", "Rounding", "expense", "expense"),
+]
+
+
+@dataclass(frozen=True)
+class TreasuryBooks:
+    """A company that can raise an invoice, pay it, and reconcile the bank."""
+
+    company_id: UUID
+    accounts: dict[str, UUID]
+    journals: dict[str, UUID]
+    taxes: dict[str, UUID]
+
+
+def make_treasury_company(session: Session, *, base_currency: str = "SAR") -> TreasuryBooks:
+    from decimal import Decimal as D
+
+    from app.billing.models import Tax
+    from app.ledger.api import Account, Journal, LedgerSettings
+
+    company = Company(
+        id=uuid7(), name="Jeddah Trading", base_currency=base_currency, vat_number="3" * 15
+    )
+    session.add(company)
+    session.flush()
+
+    accounts = {
+        code: Account(
+            id=uuid7(),
+            company_id=company.id,
+            code=code,
+            name=name,
+            type=type_,
+            subtype=subtype,
+            is_reconcilable=subtype in ("receivable", "payable"),
+        )
+        for code, name, type_, subtype in TREASURY_CHART
+    }
+    journals = {
+        code: Journal(id=uuid7(), company_id=company.id, code=code, name=name, type=type_)
+        for code, name, type_ in (
+            ("INV", "Customer Invoices", "sales"),
+            ("BILL", "Vendor Bills", "purchases"),
+            ("BNK", "Bank", "bank"),
+            ("CSH", "Cash", "cash"),
+            ("MISC", "Miscellaneous", "general"),
+        )
+    }
+    session.add_all([*accounts.values(), *journals.values()])
+    session.flush()
+
+    session.add(
+        LedgerSettings(
+            company_id=company.id,
+            receivable_account_id=accounts["1200"].id,
+            payable_account_id=accounts["2100"].id,
+            rounding_account_id=accounts["5900"].id,
+            outstanding_receipts_account_id=accounts["1120"].id,
+            outstanding_payments_account_id=accounts["2120"].id,
+            fx_gain_account_id=accounts["4900"].id,
+            fx_loss_account_id=accounts["5800"].id,
+        )
+    )
+    taxes = {
+        "sale": Tax(
+            id=uuid7(),
+            company_id=company.id,
+            name="VAT 15%",
+            rate=D("15"),
+            type="sale",
+            account_id=accounts["2200"].id,
+            grid_tag="sales_standard",
+        ),
+        "purchase": Tax(
+            id=uuid7(),
+            company_id=company.id,
+            name="VAT 15% (purchases)",
+            rate=D("15"),
+            type="purchase",
+            account_id=accounts["1300"].id,
+            grid_tag="purchases_standard",
+        ),
+        "withholding": Tax(
+            id=uuid7(),
+            company_id=company.id,
+            name="Withholding 5%",
+            rate=D("5"),
+            type="withholding",
+            account_id=accounts["2300"].id,
+            grid_tag="withholding",
+        ),
+    }
+    session.add_all(taxes.values())
+    session.commit()
+    return TreasuryBooks(
+        company_id=company.id,
+        accounts={code: account.id for code, account in accounts.items()},
+        journals={code: journal.id for code, journal in journals.items()},
+        taxes={key: tax.id for key, tax in taxes.items()},
+    )

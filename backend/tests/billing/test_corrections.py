@@ -82,8 +82,9 @@ class TestCreditNotes:
         self, session: Session, books, customer, vat15
     ) -> None:
         """R5.AC5 — a partial credit is the common case."""
-        invoice = posted_invoice(session, books, customer, vat15, quantity="10",
-                                 unit_price="100.00")
+        invoice = posted_invoice(
+            session, books, customer, vat15, quantity="10", unit_price="100.00"
+        )
         note = credit_note_from(session, books.id, invoice.id)
         trimmed = update_document(
             session,
@@ -135,8 +136,9 @@ class TestCreditNotes:
     def test_two_partial_credits_that_fit_are_allowed(
         self, session: Session, books, customer, vat15
     ) -> None:
-        invoice = posted_invoice(session, books, customer, vat15, quantity="10",
-                                 unit_price="100.00")
+        invoice = posted_invoice(
+            session, books, customer, vat15, quantity="10", unit_price="100.00"
+        )
 
         for _ in range(2):
             note = credit_note_from(session, books.id, invoice.id)

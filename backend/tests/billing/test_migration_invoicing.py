@@ -68,9 +68,7 @@ def test_a_partner_records_what_a_tax_invoice_needs(session: Session) -> None:
     """R9.AC2 — and NFR5: ZATCA needs these next."""
     columns = set(
         session.execute(
-            text(
-                "SELECT column_name FROM information_schema.columns WHERE table_name = 'partner'"
-            )
+            text("SELECT column_name FROM information_schema.columns WHERE table_name = 'partner'")
         ).scalars()
     )
     assert {"vat_number", "cr_number", "address", "name_ar"} <= columns
@@ -154,9 +152,7 @@ class TestConstraints:
                 },
             )
 
-    def test_a_vendor_reference_is_unique_per_vendor(
-        self, engine: Engine, books, vendor
-    ) -> None:
+    def test_a_vendor_reference_is_unique_per_vendor(self, engine: Engine, books, vendor) -> None:
         """R4.AC3"""
         from tests.billing.conftest import journal_id
 

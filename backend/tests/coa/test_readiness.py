@@ -46,15 +46,15 @@ def test_unset_defaults_are_reported(session: Session, books: Books) -> None:
     assert "receivable" not in missing
 
 
-def test_a_bank_journal_without_an_account_is_reported(
-    session: Session, books: Books
-) -> None:
+def test_a_bank_journal_without_an_account_is_reported(session: Session, books: Books) -> None:
     """R8.AC2"""
     journal = create_journal(
         session,
         books.company_id,
         JournalData(
-            code="BNK5", name="Second Bank", type="bank",
+            code="BNK5",
+            name="Second Bank",
+            type="bank",
             default_account_id=books.accounts["bank"],
         ),
     )

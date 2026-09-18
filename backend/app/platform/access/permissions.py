@@ -25,6 +25,11 @@ PERMISSIONS: dict[str, str] = {
     "invoice:read": "See invoices, bills and notes",
     "invoice:manage": "Create and change draft documents",
     "invoice:post": "Issue and cancel documents",
+    "payment:read": "See payments and what they settle",
+    "payment:manage": "Record and change draft payments",
+    "payment:post": "Post, cancel, match and reconcile",
+    "statement:read": "See imported bank statements",
+    "statement:import": "Import bank statement files",
 }
 
 CODES = frozenset(PERMISSIONS)

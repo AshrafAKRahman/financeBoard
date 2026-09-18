@@ -59,9 +59,7 @@ def test_a_bad_saudi_vat_number_is_refused(session: Session, plain_company, bad:
     session.rollback()
 
 
-def test_a_vat_number_is_optional_and_spaces_are_tolerated(
-    session: Session, plain_company
-) -> None:
+def test_a_vat_number_is_optional_and_spaces_are_tolerated(session: Session, plain_company) -> None:
     without = create_partner(
         session, plain_company.id, PartnerData(name="Cash Sale", type="customer")
     )

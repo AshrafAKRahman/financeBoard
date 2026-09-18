@@ -46,7 +46,8 @@ def test_the_response_carries_no_token(
 ) -> None:
     sign_in(client, administrator)
     response = client.post(
-        "/api/v1/invitations", json={"email": fresh_email(), "name": "New Joiner"},
+        "/api/v1/invitations",
+        json={"email": fresh_email(), "name": "New Joiner"},
         headers=SAME_ORIGIN,
     )
     assert token_from(mailer) not in response.text
@@ -95,9 +96,7 @@ def test_checking_a_link_before_using_it(
     ("token", "status", "code"),
     [("made-up-token", 404, "identity.invitation_invalid")],
 )
-def test_a_bad_link_is_reported(
-    client: TestClient, token: str, status: int, code: str
-) -> None:
+def test_a_bad_link_is_reported(client: TestClient, token: str, status: int, code: str) -> None:
     response = client.get(f"/api/v1/invitations/{token}")
     assert response.status_code == status
     assert response.json()["code"] == code
@@ -108,7 +107,8 @@ def test_a_used_link_cannot_be_used_again(
 ) -> None:
     sign_in(client, administrator)
     client.post(
-        "/api/v1/invitations", json={"email": fresh_email(), "name": "New Joiner"},
+        "/api/v1/invitations",
+        json={"email": fresh_email(), "name": "New Joiner"},
         headers=SAME_ORIGIN,
     )
     token = token_from(mailer)
@@ -129,14 +129,13 @@ def test_resending_replaces_the_link(
 ) -> None:
     sign_in(client, administrator)
     created = client.post(
-        "/api/v1/invitations", json={"email": fresh_email(), "name": "New Joiner"},
+        "/api/v1/invitations",
+        json={"email": fresh_email(), "name": "New Joiner"},
         headers=SAME_ORIGIN,
     ).json()
     first_token = token_from(mailer)
 
-    resent = client.post(
-        f"/api/v1/invitations/{created['id']}/resend", headers=SAME_ORIGIN
-    )
+    resent = client.post(f"/api/v1/invitations/{created['id']}/resend", headers=SAME_ORIGIN)
     assert resent.status_code == 200
     second_token = token_from(mailer)
     assert second_token != first_token
@@ -151,14 +150,16 @@ def test_revoking_kills_the_link(
 ) -> None:
     sign_in(client, administrator)
     created = client.post(
-        "/api/v1/invitations", json={"email": fresh_email(), "name": "New Joiner"},
+        "/api/v1/invitations",
+        json={"email": fresh_email(), "name": "New Joiner"},
         headers=SAME_ORIGIN,
     ).json()
     token = token_from(mailer)
 
-    assert client.post(
-        f"/api/v1/invitations/{created['id']}/revoke", headers=SAME_ORIGIN
-    ).status_code == 204
+    assert (
+        client.post(f"/api/v1/invitations/{created['id']}/revoke", headers=SAME_ORIGIN).status_code
+        == 204
+    )
 
     client.cookies.clear()
     assert client.get(f"/api/v1/invitations/{token}").status_code == 404
@@ -167,15 +168,14 @@ def test_revoking_kills_the_link(
 def test_inviting_needs_the_permission(client: TestClient, bystander: Person) -> None:
     sign_in(client, bystander)
     response = client.post(
-        "/api/v1/invitations", json={"email": fresh_email(), "name": "New Joiner"},
+        "/api/v1/invitations",
+        json={"email": fresh_email(), "name": "New Joiner"},
         headers=SAME_ORIGIN,
     )
     assert response.status_code == 403
 
 
-def test_a_duplicate_address_is_refused(
-    client: TestClient, administrator: Person
-) -> None:
+def test_a_duplicate_address_is_refused(client: TestClient, administrator: Person) -> None:
     sign_in(client, administrator)
     email = fresh_email()
     body = {"email": email, "name": "New Joiner"}

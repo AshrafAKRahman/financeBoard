@@ -40,9 +40,7 @@ class TestUsers:
         assert other.get("/api/v1/auth/me").status_code == 200
 
         sign_in(client, administrator)
-        response = client.post(
-            f"/api/v1/users/{bystander.user_id}/deactivate", headers=SAME_ORIGIN
-        )
+        response = client.post(f"/api/v1/users/{bystander.user_id}/deactivate", headers=SAME_ORIGIN)
         assert response.status_code == 204
         assert other.get("/api/v1/auth/me").status_code == 401
 
@@ -166,7 +164,11 @@ class TestRoleGrants:
 
 class TestAuditLog:
     def test_the_log_comes_back_newest_first(
-        self, client: TestClient, administrator: Person, bystander: Person, company: Company,
+        self,
+        client: TestClient,
+        administrator: Person,
+        bystander: Person,
+        company: Company,
         reader_role,
     ) -> None:
         """R8.AC5"""
@@ -185,7 +187,11 @@ class TestAuditLog:
         assert entries[0]["target_id"] == str(bystander.user_id)
 
     def test_reading_the_log_needs_the_permission(
-        self, client: TestClient, session: Session, bystander: Person, company: Company,
+        self,
+        client: TestClient,
+        session: Session,
+        bystander: Person,
+        company: Company,
         reader_role,
     ) -> None:
         from app.platform.access.api import grant_role

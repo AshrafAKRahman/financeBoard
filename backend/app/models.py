@@ -6,4 +6,5 @@ import app.platform.access.models
 import app.platform.audit.models
 import app.platform.identity.models
 import app.platform.sequence.models
-import app.platform.tenancy.models  # noqa: F401
+import app.platform.tenancy.models
+import app.treasury.models  # noqa: F401

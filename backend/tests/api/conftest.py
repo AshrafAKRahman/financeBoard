@@ -71,9 +71,7 @@ def company(session: Session) -> Company:
     return company
 
 
-def make_person(
-    session: Session, mailer: RecordingMailer, *, name: str = "Test Person"
-) -> Person:
+def make_person(session: Session, mailer: RecordingMailer, *, name: str = "Test Person") -> Person:
     email = f"api-{uuid7().hex[-10:]}@example.sa"
     result = identity.invite_user(session, email=email, name=name, mailer=mailer)
     identity.accept_invitation(session, result.link.rsplit("/", 2)[-2], PASSWORD)

@@ -105,6 +105,14 @@ flowchart LR
 | `zatca` | 1 | EGS units, keys/CSIDs, XML, signing, QR, hash chain, submissions |
 | `banking` | 1 | bank accounts, statements, import parsers, bank-feed adapters (2) |
 | `payments` | 1 | payments, reconciliation, FX difference entries, provider adapters (2) |
+
+`banking` and `payments` are built as one Python package, **`app.treasury`**, because they
+share the open-amount machinery: a statement line is reconciled to a payment, and both close
+the same ledger lines. Inside it, `statements` parses bank files with no database at all,
+`reconciling` imports and reconciles them, `payments` records and posts, `matching` settles
+open items and `exchange` works out realised differences. The provider adapters of Phase 2
+(Moyasar, Geidea, bank feeds) will call `match_lines` and `reconcile_line` rather than
+replace them.
 | `reporting` | 1 | financial reports, VAT return, dashboards (2), Zakat (2) |
 | `approvals` | 2 | approval rules, requests, steps |
 | `inventory` | 2 | products, locations, stock moves, valuation layers |

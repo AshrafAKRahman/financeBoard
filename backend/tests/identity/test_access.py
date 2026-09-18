@@ -105,14 +105,10 @@ def test_revoking_takes_the_permissions_away(
     assert session.get(UserCompanyRole, (user.id, company.id, reader_role.id)) is None
 
 
-def test_an_unknown_role_is_reported(
-    session: Session, user: AppUser, company: Company
-) -> None:
+def test_an_unknown_role_is_reported(session: Session, user: AppUser, company: Company) -> None:
     """R5.AC5"""
     with pytest.raises(DomainError) as error:
-        access.grant_role(
-            session, user_id=user.id, company_id=company.id, role_id=uuid7()
-        )
+        access.grant_role(session, user_id=user.id, company_id=company.id, role_id=uuid7())
     assert error.value.code == "identity.role_not_found"
     session.rollback()
 
@@ -121,8 +117,9 @@ def test_the_last_administrator_cannot_be_revoked(
     session: Session, user: AppUser, company: Company
 ) -> None:
     """R5.AC6"""
-    session.execute(text("DELETE FROM user_company_role WHERE role_id = :r"),
-                    {"r": ADMINISTRATOR_ROLE_ID})
+    session.execute(
+        text("DELETE FROM user_company_role WHERE role_id = :r"), {"r": ADMINISTRATOR_ROLE_ID}
+    )
     access.grant_role(
         session, user_id=user.id, company_id=company.id, role_id=ADMINISTRATOR_ROLE_ID
     )
@@ -162,9 +159,7 @@ def test_an_administrator_can_be_revoked_while_another_remains(
     assert access.permissions_for(session, second.id)[company.id] == frozenset(CODES)
 
 
-def test_changing_a_roles_permissions_is_recorded(
-    session: Session, reader_role: Role
-) -> None:
+def test_changing_a_roles_permissions_is_recorded(session: Session, reader_role: Role) -> None:
     """R5.AC7"""
     access.set_role_permissions(
         session, reader_role.id, ["user:read", "audit:read"], actor=Actor(email="admin@example.sa")

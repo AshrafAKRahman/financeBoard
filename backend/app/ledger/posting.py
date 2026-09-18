@@ -15,7 +15,13 @@ from sqlalchemy import select
 from sqlalchemy.exc import DBAPIError
 from sqlalchemy.orm import Session
 
-from app.ledger.models import Journal, JournalEntry, JournalEntryLine, LedgerSettings
+from app.ledger.models import (
+    Account,
+    Journal,
+    JournalEntry,
+    JournalEntryLine,
+    LedgerSettings,
+)
 from app.ledger.rates import currency_places, get_rate
 from app.platform.sequence.api import next_number
 from app.platform.tenancy.api import Company, fiscal_year
@@ -36,6 +42,13 @@ class PostingLine:
     due_date: date | None = None
     tax_id: UUID | None = None
     tax_grid_tag: str | None = None
+    open_item: bool = True
+    """False for a line that settles an account rather than opening something on it.
+
+    An exchange difference is the case that needs it: it brings a receivable's company-
+    currency balance to zero, so it must not itself become an open item nobody can ever
+    match (R3.AC1 applies to items, not to their corrections).
+    """
 
 
 @dataclass(frozen=True, slots=True)
@@ -65,6 +78,7 @@ class LineValues:
     due_date: date | None = None
     tax_id: UUID | None = None
     tax_grid_tag: str | None = None
+    open_item: bool = True
 
 
 ROUNDING_LINE_NAME = "Currency conversion rounding"
@@ -124,6 +138,7 @@ def convert_lines(
                 due_date=line.due_date,
                 tax_id=line.tax_id,
                 tax_grid_tag=line.tax_grid_tag,
+                open_item=line.open_item,
             )
         )
 
@@ -149,6 +164,7 @@ def convert_lines(
             currency_code=currency_code,
             amount_currency=ZERO,
             name=ROUNDING_LINE_NAME,
+            open_item=False,
         )
     )
     return converted
@@ -224,6 +240,8 @@ def reverse(
             due_date=line.due_date,
             tax_id=line.tax_id,
             tax_grid_tag=line.tax_grid_tag,
+            # A reversal of a correction is a correction: it opens nothing either.
+            open_item=line.residual is not None,
         )
         for line in original.lines
     ]
@@ -256,6 +274,9 @@ def _create_posted_entry(
     reversed_entry_id: UUID | None = None,
 ) -> JournalEntry:
     year = fiscal_year(entry_date, company.fiscal_year_start_month)
+    # A line on a receivable or payable account starts fully open, because the ledger is the
+    # only code that creates lines (R3.AC1).
+    open_items = _reconcilable_accounts(session, company.id, {v.account_id for v in lines})
     # Locks the counter row first (see architecture §6.2), then builds the entry.
     number = next_number(session, company.id, f"journal:{journal.id}", str(year))
 
@@ -286,6 +307,11 @@ def _create_posted_entry(
                 due_date=v.due_date,
                 tax_id=v.tax_id,
                 tax_grid_tag=v.tax_grid_tag,
+                residual=(abs(v.debit - v.credit) if _keeps_open_item(v, open_items) else None),
+                residual_currency=(
+                    abs(v.amount_currency) if _keeps_open_item(v, open_items) else None
+                ),
+                reconciled=_keeps_open_item(v, open_items) and v.debit == v.credit,
             )
             for line_no, v in enumerate(lines, start=1)
         ],
@@ -298,6 +324,29 @@ def _create_posted_entry(
     entry.posted_at = datetime.now(UTC)
     _flush(session)
     return entry
+
+
+def _keeps_open_item(line: LineValues, open_items: set[UUID]) -> bool:
+    """A line opens something only if its account keeps open items and it is not a
+    correction (R3.AC1)."""
+    return line.open_item and line.account_id in open_items
+
+
+def _reconcilable_accounts(session: Session, company_id: UUID, account_ids: set[UUID]) -> set[UUID]:
+    """Which of these accounts keep open items (R3.AC1).
+
+    Looked up before the entry is built: a query afterwards would autoflush the lines and
+    the database's own errors would surface outside the translation in ``_flush``.
+    """
+    return set(
+        session.execute(
+            select(Account.id).where(
+                Account.company_id == company_id,
+                Account.id.in_(account_ids),
+                Account.is_reconcilable,
+            )
+        ).scalars()
+    )
 
 
 def _company(session: Session, company_id: UUID) -> Company:

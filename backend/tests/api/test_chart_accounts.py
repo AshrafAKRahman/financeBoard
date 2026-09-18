@@ -31,8 +31,9 @@ def make(client: TestClient, base: str, code: str, **body):
 
 def test_an_account_is_created_and_returned(client: TestClient, signed_in: str) -> None:
     """R9.AC3"""
-    response = make(client, signed_in, "1170", name="Petty Cash", subtype="bank_cash",
-                    name_ar="النقدية")
+    response = make(
+        client, signed_in, "1170", name="Petty Cash", subtype="bank_cash", name_ar="النقدية"
+    )
 
     assert response.status_code == 201
     body = response.json()
@@ -81,26 +82,23 @@ def test_an_account_is_archived_and_disappears_from_the_chart(
 ) -> None:
     """R9.AC5"""
     created = make(client, signed_in, "1850").json()
-    response = client.post(
-        f"{signed_in}/accounts/{created['id']}/archive", headers=SAME_ORIGIN
-    )
+    response = client.post(f"{signed_in}/accounts/{created['id']}/archive", headers=SAME_ORIGIN)
     assert response.status_code == 200
     assert response.json()["active"] is False
 
     codes = {row["code"] for row in client.get(f"{signed_in}/accounts").json()}
     assert "1850" not in codes
 
-    with_archived = client.get(
-        f"{signed_in}/accounts", params={"include_archived": True}
-    ).json()
+    with_archived = client.get(f"{signed_in}/accounts", params={"include_archived": True}).json()
     assert "1850" in {row["code"] for row in with_archived}
 
 
 def test_an_unused_account_can_be_deleted(client: TestClient, signed_in: str) -> None:
     created = make(client, signed_in, "1860").json()
-    assert client.delete(
-        f"{signed_in}/accounts/{created['id']}", headers=SAME_ORIGIN
-    ).status_code == 204
+    assert (
+        client.delete(f"{signed_in}/accounts/{created['id']}", headers=SAME_ORIGIN).status_code
+        == 204
+    )
     assert "1860" not in {row["code"] for row in client.get(f"{signed_in}/accounts").json()}
 
 
@@ -111,9 +109,7 @@ def test_creating_needs_the_manage_permission(
     from app.platform.access.api import grant_role, set_role_permissions
 
     set_role_permissions(session, reader_role.id, ["account:read"])
-    grant_role(
-        session, user_id=bystander.user_id, company_id=company.id, role_id=reader_role.id
-    )
+    grant_role(session, user_id=bystander.user_id, company_id=company.id, role_id=reader_role.id)
     session.commit()
 
     sign_in(client, bystander)
@@ -165,27 +161,21 @@ def test_changes_are_audited(
     """R9.AC8"""
     created = make(client, signed_in, "1890", name="Audited").json()
     client.patch(
-        f"{signed_in}/accounts/{created['id']}", json={"name": "Audited Twice"},
+        f"{signed_in}/accounts/{created['id']}",
+        json={"name": "Audited Twice"},
         headers=SAME_ORIGIN,
     )
     session.commit()
 
-    rows = (
-        session.execute(
-            text(
-                "SELECT action, detail::text FROM audit_log WHERE target_id = :id ORDER BY at"
-            ),
-            {"id": created["id"]},
-        )
-        .all()
-    )
+    rows = session.execute(
+        text("SELECT action, detail::text FROM audit_log WHERE target_id = :id ORDER BY at"),
+        {"id": created["id"]},
+    ).all()
     assert [row.action for row in rows] == ["account.created", "account.updated"]
     assert "1890" in rows[0].detail
 
 
-def test_a_bad_account_is_refused_with_a_useful_code(
-    client: TestClient, signed_in: str
-) -> None:
+def test_a_bad_account_is_refused_with_a_useful_code(client: TestClient, signed_in: str) -> None:
     duplicate = make(client, signed_in, "1900")
     assert duplicate.status_code == 201
     again = make(client, signed_in, "1900")

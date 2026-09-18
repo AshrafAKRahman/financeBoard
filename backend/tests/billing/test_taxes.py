@@ -97,9 +97,7 @@ def test_effective_dates_decide_whether_a_tax_applies(session: Session, books) -
         effective_from=date(2018, 1, 1),
         effective_to=date(2020, 6, 30),
     )
-    current = make_tax(
-        session, books.id, name="VAT 15% (2020 on)", effective_from=date(2020, 7, 1)
-    )
+    current = make_tax(session, books.id, name="VAT 15% (2020 on)", effective_from=date(2020, 7, 1))
     session.commit()
 
     assert old.is_effective_on(date(2019, 5, 1))
@@ -204,14 +202,8 @@ class TestSaudiTaxes:
         assert all(tax.grid_tag for tax in taxes.values())
 
     def test_they_are_audited(self, session: Session, saudi_books) -> None:
-        created = (
-            session.execute(
-                text(
-                    "SELECT count(*) FROM audit_log WHERE company_id = :c "
-                    "AND action = 'tax.created'"
-                ),
-                {"c": saudi_books.id},
-            )
-            .scalar_one()
-        )
+        created = session.execute(
+            text("SELECT count(*) FROM audit_log WHERE company_id = :c AND action = 'tax.created'"),
+            {"c": saudi_books.id},
+        ).scalar_one()
         assert created == 4

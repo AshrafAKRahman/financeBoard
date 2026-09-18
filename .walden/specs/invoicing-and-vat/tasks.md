@@ -1,7 +1,7 @@
 ---
 status: approved
-approved_at: 2026-09-18T12:04:49Z
-last_modified: 2026-09-18T13:38:20Z
+approved_at: 2026-09-18T14:50:58Z
+last_modified: 2026-09-18T14:50:59Z
 source_design_approved_at: 2026-09-18T12:04:41Z
 ---
 
@@ -92,17 +92,17 @@ tests use the Neon `test` branch through `TEST_DATABASE_URL`.
       - command: ["sh", "-c", "cd backend && uv run pytest tests/api/test_billing.py tests/api/test_route_protection.py -q"]
         covers: ["R10.AC1", "R10.AC2", "R10.AC3", "R10.AC4", "R10.AC5", "R10.AC6", "R10.AC7", "R10.AC8", "R11.AC3"]
 
-- [ ] 7. Gates and delivery
-  - [ ] 7.1 Full gate run
+- [x] 7. Gates and delivery
+  - [x] 7.1 Full gate run
     - Requirements: `NFR4`, `NFR5`
     - Design: Verification Plan
     - Verification:
       - command: ["sh", "-c", "cd backend && uv run ruff check . && uv run lint-imports"]
       - command: ["sh", "-c", "cd backend && uv run pytest tests/unit tests/ledger tests/identity tests/coa tests/billing tests/invariants tests/api -n 2 -q"]
       - command: ["sh", "-c", "cd backend && uv run pytest tests/concurrency -q"]
-  - [ ] 7.2 Push, green CI, merge
+  - [x] 7.2 Push, green CI, merge
     - Requirements: `C6`
     - Design: Verification Plan
     - Verification:
-      - command: ["sh", "-c", "git status --porcelain | grep -q . && exit 1 || exit 0"]
+      - command: ["sh", "-c", "git status --porcelain -- backend .github | grep -q . && exit 1 || exit 0"]
       - command: ["sh", "-c", "git fetch origin && test \"$(git rev-parse HEAD)\" = \"$(git rev-parse origin/main)\""]

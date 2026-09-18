@@ -81,10 +81,13 @@ class TestDraftsAreEditable:
         with engine.begin() as connection:
             connection.execute(text("DELETE FROM journal_entry WHERE id = :id"), {"id": entry_id})
         with engine.connect() as connection:
-            assert connection.execute(
-                text("SELECT count(*) FROM journal_entry_line WHERE entry_id = :e"),
-                {"e": entry_id},
-            ).scalar() == 0
+            assert (
+                connection.execute(
+                    text("SELECT count(*) FROM journal_entry_line WHERE entry_id = :e"),
+                    {"e": entry_id},
+                ).scalar()
+                == 0
+            )
 
 
 class TestPostedEntriesAreImmutable:

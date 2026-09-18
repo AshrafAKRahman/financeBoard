@@ -15,13 +15,12 @@ pytestmark = pytest.mark.db
 
 def test_a_default_can_be_set_and_read_back(session: Session, books: Books) -> None:
     """R5.AC1"""
-    defaults = set_default(
-        session, books.company_id, "receivable", books.accounts["receivable"]
-    )
+    defaults = set_default(session, books.company_id, "receivable", books.accounts["receivable"])
     session.commit()
     assert defaults.accounts["receivable"] == books.accounts["receivable"]
-    assert get_defaults(session, books.company_id).accounts["receivable"] == (
-        books.accounts["receivable"]
+    assert (
+        get_defaults(session, books.company_id).accounts["receivable"]
+        == (books.accounts["receivable"])
     )
 
 

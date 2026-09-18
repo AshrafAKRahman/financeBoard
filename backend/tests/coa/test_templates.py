@@ -93,9 +93,7 @@ def test_the_saudi_specific_accounts_exist(
     assert code in chart, f"{what} account missing"
 
 
-def test_a_company_that_already_has_a_chart_is_refused(
-    session: Session, books: Books
-) -> None:
+def test_a_company_that_already_has_a_chart_is_refused(session: Session, books: Books) -> None:
     """R6.AC5"""
     with pytest.raises(DomainError) as error:
         load_template(session, books.company_id, "sa")
@@ -111,9 +109,7 @@ def test_loaded_accounts_can_be_changed_afterwards(session: Session, empty_compa
     session.commit()
 
     chart = {row.account.code: row.account for row in list_chart(session, empty_company.id)}
-    renamed = update_account(
-        session, empty_company.id, chart["5300"].id, {"name": "Office Rent"}
-    )
+    renamed = update_account(session, empty_company.id, chart["5300"].id, {"name": "Office Rent"})
     archive_account(session, empty_company.id, chart["5400"].id)
     session.commit()
 
@@ -132,8 +128,14 @@ def test_an_unknown_template_is_reported(session: Session, empty_company) -> Non
 def test_a_failed_load_leaves_nothing_behind(session: Session, empty_company) -> None:
     """R6.AC7 and NFR5 — the load is one transaction, so a failure is invisible."""
     # An account with a code the template uses makes the load fail partway.
-    account(session, empty_company.id, "2200", name="Clash", type="liability",
-            subtype="current_liability")
+    account(
+        session,
+        empty_company.id,
+        "2200",
+        name="Clash",
+        type="liability",
+        subtype="current_liability",
+    )
     session.commit()
 
     with pytest.raises(DomainError):

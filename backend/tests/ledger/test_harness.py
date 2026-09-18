@@ -42,15 +42,21 @@ def test_cleanup_drops_databases_it_created(admin_engine: Engine, test_database_
     name = "ledger_harness_probe"
     conftest._create_database(admin_engine, name)
     with admin_engine.connect() as connection:
-        assert connection.execute(
-            text("SELECT count(*) FROM pg_database WHERE datname = :n"), {"n": name}
-        ).scalar() == 1
+        assert (
+            connection.execute(
+                text("SELECT count(*) FROM pg_database WHERE datname = :n"), {"n": name}
+            ).scalar()
+            == 1
+        )
 
     conftest._drop_database(admin_engine, name)
     with admin_engine.connect() as connection:
-        assert connection.execute(
-            text("SELECT count(*) FROM pg_database WHERE datname = :n"), {"n": name}
-        ).scalar() == 0
+        assert (
+            connection.execute(
+                text("SELECT count(*) FROM pg_database WHERE datname = :n"), {"n": name}
+            ).scalar()
+            == 0
+        )
 
 
 def test_skips_when_no_test_branch_is_configured(monkeypatch: pytest.MonkeyPatch) -> None:

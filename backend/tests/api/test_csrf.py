@@ -37,9 +37,7 @@ def test_accepted_origins_come_from_configuration(monkeypatch: pytest.MonkeyPatc
 def test_a_foreign_origin_is_blocked(client: TestClient, administrator: Person) -> None:
     """R12.AC2"""
     sign_in(client, administrator)
-    response = client.post(
-        "/api/v1/invitations", json=invite_body(), headers={"Origin": FOREIGN}
-    )
+    response = client.post("/api/v1/invitations", json=invite_body(), headers={"Origin": FOREIGN})
     assert response.status_code == 403
     assert response.json()["code"] == "identity.csrf_check_failed"
 
@@ -54,9 +52,7 @@ def test_a_cross_site_fetch_is_blocked(client: TestClient, administrator: Person
     assert response.json()["code"] == "identity.csrf_check_failed"
 
 
-def test_a_write_with_neither_header_is_blocked(
-    client: TestClient, administrator: Person
-) -> None:
+def test_a_write_with_neither_header_is_blocked(client: TestClient, administrator: Person) -> None:
     """R12.AC4 — a cookie with no origin at all is refused, which also covers curl."""
     sign_in(client, administrator)
     response = client.post("/api/v1/invitations", json=invite_body())
@@ -84,9 +80,7 @@ def test_reads_are_never_checked(client: TestClient, administrator: Person) -> N
     assert client.get("/api/v1/users", headers={"Sec-Fetch-Site": "cross-site"}).status_code == 200
 
 
-def test_login_is_checked_even_without_a_session(
-    client: TestClient, administrator: Person
-) -> None:
+def test_login_is_checked_even_without_a_session(client: TestClient, administrator: Person) -> None:
     """R12.AC7 — otherwise another site could sign someone into an account it controls."""
     response = client.post(
         "/api/v1/auth/login",

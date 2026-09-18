@@ -19,9 +19,7 @@ router = APIRouter(prefix="/api/v1", tags=["administration"])
 @router.get("/users", response_model=list[UserOut], dependencies=[requires("user:read")])
 @needs("user:read")
 def list_users(session: SessionDep) -> list[AppUser]:
-    return list(
-        session.execute(select(AppUser).order_by(AppUser.email)).scalars().all()
-    )
+    return list(session.execute(select(AppUser).order_by(AppUser.email)).scalars().all())
 
 
 @router.post(

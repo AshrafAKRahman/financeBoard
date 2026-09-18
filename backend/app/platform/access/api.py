@@ -83,9 +83,7 @@ def ensure_catalogue_seeded(session: Session) -> int:
     administrator = get_role_by_name(session, ADMINISTRATOR_ROLE_NAME)
     held = set(
         session.execute(
-            select(RolePermission.permission_code).where(
-                RolePermission.role_id == administrator.id
-            )
+            select(RolePermission.permission_code).where(RolePermission.role_id == administrator.id)
         ).scalars()
     )
     for code in PERMISSIONS:

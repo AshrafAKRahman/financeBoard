@@ -12,6 +12,8 @@ dependencies = [
     "pydantic>=2.9",
     "pydantic-settings>=2.6",
     "argon2-cffi>=25.1.0",
+    # Multipart uploads: bank statement files arrive as files.
+    "python-multipart>=0.0.20",
 ]
 
 [dependency-groups]
@@ -42,11 +44,12 @@ select = ["E", "F", "I", "B", "UP", "SIM", "DTZ", "RUF"]
 root_package = "app"
 
 [[tool.importlinter.contracts]]
-name = "Module layers: ledger -> platform -> shared"
+name = "Module layers: treasury -> billing -> coa -> ledger -> platform -> shared"
 type = "layers"
 layers = [
     "app.main",
     "app.api",
+    "app.treasury",
     "app.billing",
     "app.coa",
     "app.ledger",

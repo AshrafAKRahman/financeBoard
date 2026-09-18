@@ -96,9 +96,7 @@ def test_the_open_item_line_carries_the_partner_and_due_date(
     session: Session, books, customer, vat15
 ) -> None:
     """R6.AC4 and R6.AC5 — what the aged receivables report will need."""
-    invoice = make_invoice(
-        session, books, customer, taxes=[vat15], due_date=date(2026, 4, 30)
-    )
+    invoice = make_invoice(session, books, customer, taxes=[vat15], due_date=date(2026, 4, 30))
     posted = post_document(session, books.id, invoice.id)
     session.commit()
 
@@ -108,9 +106,7 @@ def test_the_open_item_line_carries_the_partner_and_due_date(
     assert receivable.due_date == date(2026, 4, 30)
 
 
-def test_without_a_due_date_the_document_date_is_used(
-    session: Session, books, customer
-) -> None:
+def test_without_a_due_date_the_document_date_is_used(session: Session, books, customer) -> None:
     """R3.AC9"""
     invoice = make_invoice(session, books, customer)
     posted = post_document(session, books.id, invoice.id)
@@ -202,9 +198,12 @@ def test_a_failed_posting_leaves_a_draft_and_no_entry(
 
     stored = get_document(session, books.id, invoice.id)
     assert (stored.state, stored.number, stored.journal_entry_id) == ("draft", None, None)
-    assert session.execute(
-        text("SELECT count(*) FROM journal_entry WHERE source_id = :id"), {"id": invoice.id}
-    ).scalar_one() == 0
+    assert (
+        session.execute(
+            text("SELECT count(*) FROM journal_entry WHERE source_id = :id"), {"id": invoice.id}
+        ).scalar_one()
+        == 0
+    )
 
 
 def test_a_foreign_currency_invoice_is_converted_by_the_ledger(
@@ -294,9 +293,7 @@ class TestTaxRulesAtPosting:
         assert error.value.code == "tax.wrong_tax_type"
         session.rollback()
 
-    def test_a_sales_tax_on_a_bill_is_refused(
-        self, session: Session, books, vendor, vat15
-    ) -> None:
+    def test_a_sales_tax_on_a_bill_is_refused(self, session: Session, books, vendor, vat15) -> None:
         """R2.AC8, the other way round."""
         bill = make_bill(session, books, vendor, taxes=[vat15])
         with pytest.raises(DomainError) as error:
@@ -304,9 +301,7 @@ class TestTaxRulesAtPosting:
         assert error.value.code == "tax.wrong_tax_type"
         session.rollback()
 
-    def test_a_tax_without_an_account_cannot_post(
-        self, session: Session, books, customer
-    ) -> None:
+    def test_a_tax_without_an_account_cannot_post(self, session: Session, books, customer) -> None:
         homeless = create_tax(
             session,
             books.id,

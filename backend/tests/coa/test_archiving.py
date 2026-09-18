@@ -99,9 +99,7 @@ def test_an_unused_account_can_be_deleted(session: Session, books: Books) -> Non
     assert error.value.code == "coa.account_not_found"
 
 
-def test_a_default_account_cannot_be_archived_or_deleted(
-    session: Session, books: Books
-) -> None:
+def test_a_default_account_cannot_be_archived_or_deleted(session: Session, books: Books) -> None:
     """R3.AC5"""
     from app.coa.defaults import set_default
 

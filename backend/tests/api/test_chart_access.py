@@ -105,9 +105,7 @@ def test_a_signed_in_user_without_the_permission_is_refused(
     """R9.AC6 and R14 — a role in the company is not the same as the right permission."""
     from app.platform.access.api import grant_role
 
-    grant_role(
-        session, user_id=bystander.user_id, company_id=company.id, role_id=reader_role.id
-    )
+    grant_role(session, user_id=bystander.user_id, company_id=company.id, role_id=reader_role.id)
     session.commit()
 
     sign_in(client, bystander)

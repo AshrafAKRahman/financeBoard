@@ -61,9 +61,7 @@ def journal_id(session: Session, company_id, code: str):
 
 @pytest.fixture
 def customer(session: Session, books: Company):
-    return make_partner(
-        session, books.id, name_ar="مؤسسة النور", vat_number="310000000000003"
-    )
+    return make_partner(session, books.id, name_ar="مؤسسة النور", vat_number="310000000000003")
 
 
 @pytest.fixture

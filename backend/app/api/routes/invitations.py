@@ -61,9 +61,7 @@ def invite(body: InviteRequest, caller: CallerDep, session: SessionDep) -> Respo
 @router.post("/{invitation_id}/resend", dependencies=[requires("user:invite")])
 @needs("user:invite")
 def resend(invitation_id: UUID, caller: CallerDep, session: SessionDep) -> Response:
-    result = resend_invitation(
-        session, invitation_id, actor=Actor(caller.user_id, caller.email)
-    )
+    result = resend_invitation(session, invitation_id, actor=Actor(caller.user_id, caller.email))
     return _respond(session, result, status_code=status.HTTP_200_OK)
 
 
@@ -83,9 +81,7 @@ def check(token: str, session: SessionDep) -> InvitationStatus:
     """Lets the sign-up screen say "this link has expired" before asking for a password."""
     invitation = open_invitation(session, token)
     user = get_user(session, invitation.user_id)
-    return InvitationStatus(
-        status="valid", email=user.email, expires_at=invitation.expires_at
-    )
+    return InvitationStatus(status="valid", email=user.email, expires_at=invitation.expires_at)
 
 
 @router.post("/{token}/accept", status_code=status.HTTP_204_NO_CONTENT)

@@ -64,64 +64,162 @@ SAUDI_ACCOUNTS: tuple[TemplateAccount, ...] = (
     TemplateAccount(
         "11", "Current Assets", "الأصول المتداولة", "asset", "current_asset", "1", True
     ),
-    TemplateAccount("1110", "Cash on Hand", "النقد في الصندوق", "asset", "bank_cash", "11",
-                    cash_flow_tag="operating"),
-    TemplateAccount("1120", "Bank Current Account", "الحساب الجاري بالبنك", "asset", "bank_cash",
-                    "11", cash_flow_tag="operating"),
-    TemplateAccount("1130", "Outstanding Receipts", "المقبوضات المعلقة", "asset", "current_asset",
-                    "11"),
-    TemplateAccount("1200", "Trade Receivables", "الذمم المدينة التجارية", "asset", "receivable",
-                    "11"),
-    TemplateAccount("1300", "VAT Input", "ضريبة القيمة المضافة - المدخلات", "asset",
-                    "current_asset", "11"),
-    TemplateAccount("1400", "Prepaid Expenses", "المصروفات المدفوعة مقدماً", "asset", "prepayment",
-                    "11"),
+    TemplateAccount(
+        "1110",
+        "Cash on Hand",
+        "النقد في الصندوق",
+        "asset",
+        "bank_cash",
+        "11",
+        cash_flow_tag="operating",
+    ),
+    TemplateAccount(
+        "1120",
+        "Bank Current Account",
+        "الحساب الجاري بالبنك",
+        "asset",
+        "bank_cash",
+        "11",
+        cash_flow_tag="operating",
+    ),
+    TemplateAccount(
+        "1130", "Outstanding Receipts", "المقبوضات المعلقة", "asset", "current_asset", "11"
+    ),
+    TemplateAccount(
+        "1200", "Trade Receivables", "الذمم المدينة التجارية", "asset", "receivable", "11"
+    ),
+    TemplateAccount(
+        "1300", "VAT Input", "ضريبة القيمة المضافة - المدخلات", "asset", "current_asset", "11"
+    ),
+    TemplateAccount(
+        "1400", "Prepaid Expenses", "المصروفات المدفوعة مقدماً", "asset", "prepayment", "11"
+    ),
     TemplateAccount("1500", "Suspense", "حساب معلق", "asset", "current_asset", "11"),
-    TemplateAccount("12", "Non-Current Assets", "الأصول غير المتداولة", "asset",
-                    "non_current_asset", "1", True),
-    TemplateAccount("1600", "Property and Equipment", "الممتلكات والمعدات", "asset",
-                    "non_current_asset", "12", cash_flow_tag="investing"),
-    TemplateAccount("1650", "Accumulated Depreciation", "مجمع الإهلاك", "asset",
-                    "non_current_asset", "12"),
+    TemplateAccount(
+        "12", "Non-Current Assets", "الأصول غير المتداولة", "asset", "non_current_asset", "1", True
+    ),
+    TemplateAccount(
+        "1600",
+        "Property and Equipment",
+        "الممتلكات والمعدات",
+        "asset",
+        "non_current_asset",
+        "12",
+        cash_flow_tag="investing",
+    ),
+    TemplateAccount(
+        "1650", "Accumulated Depreciation", "مجمع الإهلاك", "asset", "non_current_asset", "12"
+    ),
     # Liabilities
-    TemplateAccount("2", "Liabilities", "الالتزامات", "liability", "current_liability",
-                    is_group=True),
-    TemplateAccount("21", "Current Liabilities", "الالتزامات المتداولة", "liability",
-                    "current_liability", "2", True),
-    TemplateAccount("2100", "Trade Payables", "الذمم الدائنة التجارية", "liability", "payable",
-                    "21"),
-    TemplateAccount("2130", "Outstanding Payments", "المدفوعات المعلقة", "liability",
-                    "current_liability", "21"),
-    TemplateAccount("2200", "VAT Output", "ضريبة القيمة المضافة - المخرجات", "liability",
-                    "current_liability", "21"),
-    TemplateAccount("2250", "VAT Payable", "ضريبة القيمة المضافة المستحقة", "liability",
-                    "current_liability", "21"),
-    TemplateAccount("2300", "Withholding Tax Payable", "ضريبة الاستقطاع المستحقة", "liability",
-                    "current_liability", "21"),
-    TemplateAccount("2400", "GOSI Payable", "التأمينات الاجتماعية المستحقة", "liability",
-                    "current_liability", "21"),
-    TemplateAccount("2450", "Salaries Payable", "الرواتب المستحقة", "liability",
-                    "current_liability", "21"),
-    TemplateAccount("2500", "Zakat Provision", "مخصص الزكاة", "liability", "current_liability",
-                    "21"),
-    TemplateAccount("2600", "Accrued Expenses", "المصروفات المستحقة", "liability",
-                    "current_liability", "21"),
-    TemplateAccount("22", "Non-Current Liabilities", "الالتزامات غير المتداولة", "liability",
-                    "non_current_liability", "2", True),
-    TemplateAccount("2700", "End of Service Provision", "مخصص مكافأة نهاية الخدمة", "liability",
-                    "non_current_liability", "22"),
-    TemplateAccount("2800", "Long Term Loans", "القروض طويلة الأجل", "liability",
-                    "non_current_liability", "22", cash_flow_tag="financing"),
+    TemplateAccount(
+        "2", "Liabilities", "الالتزامات", "liability", "current_liability", is_group=True
+    ),
+    TemplateAccount(
+        "21",
+        "Current Liabilities",
+        "الالتزامات المتداولة",
+        "liability",
+        "current_liability",
+        "2",
+        True,
+    ),
+    TemplateAccount(
+        "2100", "Trade Payables", "الذمم الدائنة التجارية", "liability", "payable", "21"
+    ),
+    TemplateAccount(
+        "2130", "Outstanding Payments", "المدفوعات المعلقة", "liability", "current_liability", "21"
+    ),
+    TemplateAccount(
+        "2200",
+        "VAT Output",
+        "ضريبة القيمة المضافة - المخرجات",
+        "liability",
+        "current_liability",
+        "21",
+    ),
+    TemplateAccount(
+        "2250",
+        "VAT Payable",
+        "ضريبة القيمة المضافة المستحقة",
+        "liability",
+        "current_liability",
+        "21",
+    ),
+    TemplateAccount(
+        "2300",
+        "Withholding Tax Payable",
+        "ضريبة الاستقطاع المستحقة",
+        "liability",
+        "current_liability",
+        "21",
+    ),
+    TemplateAccount(
+        "2400",
+        "GOSI Payable",
+        "التأمينات الاجتماعية المستحقة",
+        "liability",
+        "current_liability",
+        "21",
+    ),
+    TemplateAccount(
+        "2450", "Salaries Payable", "الرواتب المستحقة", "liability", "current_liability", "21"
+    ),
+    TemplateAccount(
+        "2500", "Zakat Provision", "مخصص الزكاة", "liability", "current_liability", "21"
+    ),
+    TemplateAccount(
+        "2600", "Accrued Expenses", "المصروفات المستحقة", "liability", "current_liability", "21"
+    ),
+    TemplateAccount(
+        "22",
+        "Non-Current Liabilities",
+        "الالتزامات غير المتداولة",
+        "liability",
+        "non_current_liability",
+        "2",
+        True,
+    ),
+    TemplateAccount(
+        "2700",
+        "End of Service Provision",
+        "مخصص مكافأة نهاية الخدمة",
+        "liability",
+        "non_current_liability",
+        "22",
+    ),
+    TemplateAccount(
+        "2800",
+        "Long Term Loans",
+        "القروض طويلة الأجل",
+        "liability",
+        "non_current_liability",
+        "22",
+        cash_flow_tag="financing",
+    ),
     # Equity
     TemplateAccount("3", "Equity", "حقوق الملكية", "equity", "equity", is_group=True),
-    TemplateAccount("3100", "Share Capital", "رأس المال", "equity", "equity", "3",
-                    cash_flow_tag="financing"),
+    TemplateAccount(
+        "3100", "Share Capital", "رأس المال", "equity", "equity", "3", cash_flow_tag="financing"
+    ),
     TemplateAccount("3200", "Statutory Reserve", "الاحتياطي النظامي", "equity", "equity", "3"),
     TemplateAccount("3300", "Retained Earnings", "الأرباح المبقاة", "equity", "equity", "3"),
-    TemplateAccount("3400", "Current Year Earnings", "أرباح العام الحالي", "equity",
-                    "current_year_earnings", "3"),
-    TemplateAccount("3500", "Owner Drawings", "مسحوبات الملاك", "equity", "equity", "3",
-                    cash_flow_tag="financing"),
+    TemplateAccount(
+        "3400",
+        "Current Year Earnings",
+        "أرباح العام الحالي",
+        "equity",
+        "current_year_earnings",
+        "3",
+    ),
+    TemplateAccount(
+        "3500",
+        "Owner Drawings",
+        "مسحوبات الملاك",
+        "equity",
+        "equity",
+        "3",
+        cash_flow_tag="financing",
+    ),
     # Income
     TemplateAccount("4", "Income", "الإيرادات", "income", "income", is_group=True),
     TemplateAccount("4100", "Sales Revenue", "إيرادات المبيعات", "income", "income", "4"),
@@ -130,17 +228,27 @@ SAUDI_ACCOUNTS: tuple[TemplateAccount, ...] = (
     TemplateAccount("4400", "Exchange Gain", "أرباح فروق العملة", "income", "other_income", "4"),
     # Expenses
     TemplateAccount("5", "Expenses", "المصروفات", "expense", "expense", is_group=True),
-    TemplateAccount("51", "Cost of Revenue", "تكلفة الإيرادات", "expense", "cost_of_revenue", "5",
-                    True),
-    TemplateAccount("5100", "Cost of Goods Sold", "تكلفة البضاعة المباعة", "expense",
-                    "cost_of_revenue", "51"),
-    TemplateAccount("52", "Operating Expenses", "المصروفات التشغيلية", "expense", "expense", "5",
-                    True),
+    TemplateAccount(
+        "51", "Cost of Revenue", "تكلفة الإيرادات", "expense", "cost_of_revenue", "5", True
+    ),
+    TemplateAccount(
+        "5100", "Cost of Goods Sold", "تكلفة البضاعة المباعة", "expense", "cost_of_revenue", "51"
+    ),
+    TemplateAccount(
+        "52", "Operating Expenses", "المصروفات التشغيلية", "expense", "expense", "5", True
+    ),
     TemplateAccount("5200", "Salaries and Wages", "الرواتب والأجور", "expense", "expense", "52"),
-    TemplateAccount("5210", "GOSI Employer Contribution", "حصة صاحب العمل في التأمينات",
-                    "expense", "expense", "52"),
-    TemplateAccount("5220", "End of Service Expense", "مصروف نهاية الخدمة", "expense", "expense",
-                    "52"),
+    TemplateAccount(
+        "5210",
+        "GOSI Employer Contribution",
+        "حصة صاحب العمل في التأمينات",
+        "expense",
+        "expense",
+        "52",
+    ),
+    TemplateAccount(
+        "5220", "End of Service Expense", "مصروف نهاية الخدمة", "expense", "expense", "52"
+    ),
     TemplateAccount("5300", "Rent", "الإيجار", "expense", "expense", "52"),
     TemplateAccount("5400", "Utilities", "المرافق", "expense", "expense", "52"),
     TemplateAccount("5500", "Professional Fees", "الأتعاب المهنية", "expense", "expense", "52"),

@@ -108,9 +108,7 @@ def test_foreign_currency_reversal_copies_company_amounts(session: Session) -> N
     session.commit()
 
     assert len(reversal.lines) == len(original.lines)
-    assert sum(line.debit for line in reversal.lines) == sum(
-        line.credit for line in original.lines
-    )
+    assert sum(line.debit for line in reversal.lines) == sum(line.credit for line in original.lines)
     total = session.execute(
         text(
             "SELECT sum(debit) - sum(credit), sum(amount_currency) "

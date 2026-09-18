@@ -59,7 +59,7 @@ def test_multiline_detail_is_kept() -> None:
     "primary",
     [
         'duplicate key value violates unique constraint "journal_entry_number_uniq"',
-        "new row for relation \"journal_entry_line\" violates check constraint",
+        'new row for relation "journal_entry_line" violates check constraint',
         "ledger_unbalanced: missing the dot",
         "Ledger.Unbalanced: wrong case",
         None,  # no diagnostics at all (e.g. a dropped connection)

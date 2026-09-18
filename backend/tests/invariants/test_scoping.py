@@ -89,9 +89,7 @@ class TestCompanyIsolation:
                 },
             )
 
-    def test_base_currency_is_frozen_once_entries_exist(
-        self, engine: Engine, books: Books
-    ) -> None:
+    def test_base_currency_is_frozen_once_entries_exist(self, engine: Engine, books: Books) -> None:
         with engine.begin() as connection:
             connection.execute(
                 text("UPDATE company SET base_currency = 'USD' WHERE id = :id"),
@@ -198,18 +196,19 @@ class TestLockDates:
                 entry_id = insert_draft_entry(connection, books, BALANCED, on=entry_date)
                 mark_posted(connection, entry_id, f"MISC/2026/{entry_date.month:05d}")
 
-    def test_posting_after_the_lock_date_is_allowed(
-        self, engine: Engine, session: Session
-    ) -> None:
+    def test_posting_after_the_lock_date_is_allowed(self, engine: Engine, session: Session) -> None:
         books = make_books(session, lock_date=date(2026, 3, 31))
         with engine.begin() as connection:
             entry_id = insert_draft_entry(connection, books, BALANCED, on=date(2026, 4, 1))
             mark_posted(connection, entry_id, "MISC/2026/00300")
 
         with engine.connect() as connection:
-            assert connection.execute(
-                text("SELECT state FROM journal_entry WHERE id = :id"), {"id": entry_id}
-            ).scalar() == "posted"
+            assert (
+                connection.execute(
+                    text("SELECT state FROM journal_entry WHERE id = :id"), {"id": entry_id}
+                ).scalar()
+                == "posted"
+            )
 
     def test_a_draft_may_sit_in_a_locked_period(self, engine: Engine, session: Session) -> None:
         """Only posting is blocked, so a document can still be prepared and re-dated."""

@@ -40,8 +40,9 @@ def test_an_invoice_starts_as_a_draft(session: Session, books, customer, vat15) 
 
 def test_totals_come_from_the_lines(session: Session, books, customer, vat15) -> None:
     """R2.AC9 in practice: nothing is stored, so nothing can drift."""
-    invoice = make_invoice(session, books, customer, taxes=[vat15], quantity="3",
-                           unit_price="100.00")
+    invoice = make_invoice(
+        session, books, customer, taxes=[vat15], quantity="3", unit_price="100.00"
+    )
     session.commit()
 
     totals = totals_of(session, get_document(session, books.id, invoice.id))
@@ -87,9 +88,7 @@ def test_a_due_date_is_stored(session: Session, books, customer) -> None:
     assert get_document(session, books.id, invoice.id).due_date == date(2026, 4, 15)
 
 
-@pytest.mark.parametrize(
-    ("quantity", "price"), [("-1", "100.00"), ("1", "-100.00")]
-)
+@pytest.mark.parametrize(("quantity", "price"), [("-1", "100.00"), ("1", "-100.00")])
 def test_a_negative_line_is_refused(
     session: Session, books, customer, quantity: str, price: str
 ) -> None:
@@ -200,9 +199,7 @@ def test_documents_can_be_listed_and_filtered(
 
 
 class TestVendorBills:
-    def test_a_bill_records_the_vendors_own_number(
-        self, session: Session, books, vendor
-    ) -> None:
+    def test_a_bill_records_the_vendors_own_number(self, session: Session, books, vendor) -> None:
         """R4.AC1 and R4.AC2"""
         bill = make_bill(session, books, vendor, vendor_reference="INV-5521")
         session.commit()

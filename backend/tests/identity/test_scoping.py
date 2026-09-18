@@ -109,9 +109,7 @@ def test_permissions_differ_per_company(
     """R6.AC5 — clerk here, administrator there."""
     riyadh, jeddah = two_companies
     access.grant_role(session, user_id=user.id, company_id=riyadh.id, role_id=clerk_role.id)
-    access.grant_role(
-        session, user_id=user.id, company_id=jeddah.id, role_id=ADMINISTRATOR_ROLE_ID
-    )
+    access.grant_role(session, user_id=user.id, company_id=jeddah.id, role_id=ADMINISTRATOR_ROLE_ID)
     session.commit()
     caller = caller_for(session, user)
 

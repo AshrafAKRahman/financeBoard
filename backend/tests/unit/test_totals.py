@@ -39,9 +39,7 @@ class TestOneLine:
 
     def test_a_discount_reduces_the_base(self) -> None:
         """R2.AC2"""
-        amounts = line_amounts(
-            LineInput(d("2"), d("50.00"), [VAT15], discount_percent=d("10")), 2
-        )
+        amounts = line_amounts(LineInput(d("2"), d("50.00"), [VAT15], discount_percent=d("10")), 2)
         assert amounts.net == d("90.00")
         assert amounts.tax_total == d("13.50")
 
