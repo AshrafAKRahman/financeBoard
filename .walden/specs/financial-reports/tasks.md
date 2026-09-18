@@ -1,7 +1,7 @@
 ---
 status: approved
 approved_at: 2026-09-18T20:12:28Z
-last_modified: 2026-09-18T21:11:22Z
+last_modified: 2026-09-18T23:47:01Z
 source_design_approved_at: 2026-09-18T20:12:28Z
 ---
 
@@ -129,8 +129,8 @@ tests use the Neon `test` branch through `TEST_DATABASE_URL`.
       - command: ["sh", "-c", "cd backend && uv run pytest tests/reporting/test_read_only.py -q"]
         covers: ["NFR2", "NFR3", "NFR6"]
 
-- [ ] 7. Delivery
-  - [ ] 7.1 Full gate: format, lint, layers, whole suite
+- [x] 7. Delivery
+  - [x] 7.1 Full gate: format, lint, layers, whole suite
     - Requirements: `NFR1`, `NFR4`, `NFR5`, `C1`, `C2`, `C3`, `C4`, `C5`, `C6`, `C7`
     - Design: Verification Plan
     - Verification:
@@ -140,7 +140,7 @@ tests use the Neon `test` branch through `TEST_DATABASE_URL`.
         covers: ["NFR1", "NFR2"]
       - command: ["sh", "-c", "cd backend && uv run pytest tests/concurrency -q"]
         covers: ["C1"]
-  - [ ] 7.2 Push, green CI, merge
+  - [x] 7.2 Push, green CI, merge
     - Requirements: `C7`
     - Design: Verification Plan
     - Verification:

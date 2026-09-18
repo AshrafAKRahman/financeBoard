@@ -45,3 +45,8 @@ Review this file before non-trivial work when the current request matches past m
 - Lesson: A phased brief can specify every engine and still omit the things a user reaches for first — the screen, getting data out, and getting data in from paper
 - Guardrail: When a brief is organised by phase, check each phase names its user-facing deliverable and its data in/out paths, not only its engine; a phase whose only output is an API is not shippable to a person
 
+### 2026-09-18T23:47:37Z | financial-reports | execute
+- Trigger: The two-second performance bound failed at 2.25s; profiling showed five round trips to a hosted database, not a slow query
+- Lesson: Against a hosted database the cost of a report is the number of queries, not the number of rows — and a design claiming 'one query' is worth checking against the code that implements it
+- Guardrail: When a report or endpoint misses a latency budget, count its round trips before optimising SQL; fold conditional sums into one query rather than asking the database the same question with different dates
+
