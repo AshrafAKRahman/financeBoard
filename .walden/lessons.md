@@ -25,3 +25,8 @@ Review this file before non-trivial work when the current request matches past m
 - Lesson: Local runs always had backend/.env and pre-existing rows, so environment-free and constraint-edge paths were never exercised
 - Guardrail: Before pushing: run the unit suite with an empty environment (env -i) and, when a test back-dates a timestamp, move every column the row's CHECK constraints compare
 
+### 2026-09-18T11:53:56Z | chart-of-accounts | execute
+- Trigger: Seven identity tests failed after adding permission codes only in Python; a freshly migrated database lacked them until the app started
+- Lesson: Treated the start-up catalogue sync as sufficient, so 'migrate then run tests' produced a database that did not match the code
+- Guardrail: When adding a permission or other reference data, seed it in the migration as well as the code sync, so a migrated database is complete on its own
+

@@ -18,6 +18,13 @@ PERMISSIONS: dict[str, str] = {
     "rate:read": "See exchange rates",
     "rate:manage": "Enter and import exchange rates",
     "chart:load": "Load a ready-made chart of accounts",
+    "partner:read": "See customers and vendors",
+    "partner:manage": "Create and change customers and vendors",
+    "tax:read": "See tax definitions",
+    "tax:manage": "Create and change tax definitions",
+    "invoice:read": "See invoices, bills and notes",
+    "invoice:manage": "Create and change draft documents",
+    "invoice:post": "Issue and cancel documents",
 }
 
 CODES = frozenset(PERMISSIONS)

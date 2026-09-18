@@ -13,6 +13,7 @@ from pydantic import BaseModel, Field
 
 from app.api.deps import CallerDep, SessionDep, requires
 from app.api.protection import needs
+from app.billing.taxes import install_saudi_taxes
 from app.coa import accounts as accounts_service
 from app.coa import defaults as defaults_service
 from app.coa import journals as journals_service
@@ -109,6 +110,7 @@ class TemplateLoadedOut(BaseModel):
     accounts: int
     journals: int
     defaults: int
+    taxes: int
 
 
 class RateIn(BaseModel):
@@ -365,8 +367,14 @@ def load_template(
     company_id: UUID, key: str, caller: CallerDep, session: SessionDep
 ) -> TemplateLoadedOut:
     result = templates_service.load_template(session, company_id, key, actor=_actor(caller))
+    # Taxes belong to billing, which sits above the chart module, so the two are composed
+    # here rather than inside the template loader.
+    taxes = install_saudi_taxes(session, company_id, actor=_actor(caller)) if key == "sa" else []
     return TemplateLoadedOut(
-        accounts=result.accounts, journals=result.journals, defaults=result.defaults
+        accounts=result.accounts,
+        journals=result.journals,
+        defaults=result.defaults,
+        taxes=len(taxes),
     )
 
 
