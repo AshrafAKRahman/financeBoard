@@ -11,6 +11,7 @@ dependencies = [
     "alembic>=1.14",
     "pydantic>=2.9",
     "pydantic-settings>=2.6",
+    "argon2-cffi>=25.1.0",
 ]
 
 [dependency-groups]
@@ -45,15 +46,18 @@ name = "Module layers: ledger -> platform -> shared"
 type = "layers"
 layers = [
     "app.main",
+    "app.api",
     "app.ledger",
     "app.platform",
     "app.shared",
 ]
 
+# identity and access never import each other; both may use audit and mail.
 [[tool.importlinter.contracts]]
-name = "Platform modules are independent"
-type = "independence"
-modules = [
-    "app.platform.tenancy",
-    "app.platform.sequence",
+name = "Platform layers: identity/access above audit/mail above tenancy/sequence"
+type = "layers"
+layers = [
+    "app.platform.identity : app.platform.access",
+    "app.platform.audit : app.platform.mail",
+    "app.platform.tenancy : app.platform.sequence",
 ]
