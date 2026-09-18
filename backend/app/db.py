@@ -47,14 +47,22 @@ def make_engine(url: str | URL, *, pooled: bool, pool_size: int = 5) -> Engine:
     )
 
 
+def _require(url: str, name: str) -> str:
+    if not url:
+        raise RuntimeError(f"{name} is not set; point it at the Neon endpoint for this app")
+    return url
+
+
 @cache
 def pooled_engine() -> Engine:
-    return make_engine(get_settings().database_url, pooled=True)
+    return make_engine(_require(get_settings().database_url, "DATABASE_URL"), pooled=True)
 
 
 @cache
 def direct_engine() -> Engine:
-    return make_engine(get_settings().database_url_direct, pooled=False)
+    return make_engine(
+        _require(get_settings().database_url_direct, "DATABASE_URL_DIRECT"), pooled=False
+    )
 
 
 @contextmanager

@@ -24,10 +24,17 @@ def test_worker_gets_its_own_database(engine: Engine, worker_id: str) -> None:
 
 def test_database_is_migrated(engine: Engine) -> None:
     """R15.AC2 — migrations ran, so the schema and seed data are present."""
+    from alembic.config import Config
+    from alembic.script import ScriptDirectory
+
+    head = ScriptDirectory.from_config(
+        Config(str(conftest.BACKEND_DIR / "alembic.ini"))
+    ).get_current_head()
+
     with engine.connect() as connection:
         assert connection.execute(text("SELECT count(*) FROM currency")).scalar() == 13
         version = connection.execute(text("SELECT version_num FROM alembic_version")).scalar()
-    assert version == "0001"
+    assert version == head
 
 
 def test_cleanup_drops_databases_it_created(admin_engine: Engine, test_database_url: str) -> None:

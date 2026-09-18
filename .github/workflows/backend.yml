@@ -64,6 +64,9 @@ jobs:
     # database tests skip themselves (R15.AC4) and this job reports that instead of failing.
     env:
       TEST_DATABASE_URL: ${{ secrets.NEON_TEST_DATABASE_URL }}
+      # The app's own engines point at the same test branch in CI.
+      DATABASE_URL: ${{ secrets.NEON_TEST_DATABASE_URL }}
+      DATABASE_URL_DIRECT: ${{ secrets.NEON_TEST_DATABASE_URL }}
     steps:
       - uses: actions/checkout@v4
 
