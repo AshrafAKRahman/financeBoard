@@ -53,6 +53,7 @@ class Account(Base):
         UniqueConstraint("company_id", "code"),
         UniqueConstraint("id", "company_id"),
         ForeignKeyConstraint(["parent_id", "company_id"], ["account.id", "account.company_id"]),
+        Index("account_tree", "company_id", "parent_id", "code"),
     )
 
     id: Mapped[UUID] = mapped_column(primary_key=True)
@@ -106,12 +107,40 @@ class LedgerSettings(Base):
         ForeignKeyConstraint(
             ["fx_loss_account_id", "company_id"], ["account.id", "account.company_id"]
         ),
+        ForeignKeyConstraint(
+            ["receivable_account_id", "company_id"], ["account.id", "account.company_id"],
+            name="ledger_settings_receivable_fkey",
+        ),
+        ForeignKeyConstraint(
+            ["payable_account_id", "company_id"], ["account.id", "account.company_id"],
+            name="ledger_settings_payable_fkey",
+        ),
+        ForeignKeyConstraint(
+            ["outstanding_receipts_account_id", "company_id"],
+            ["account.id", "account.company_id"],
+            name="ledger_settings_outstanding_receipts_fkey",
+        ),
+        ForeignKeyConstraint(
+            ["outstanding_payments_account_id", "company_id"],
+            ["account.id", "account.company_id"],
+            name="ledger_settings_outstanding_payments_fkey",
+        ),
+        ForeignKeyConstraint(
+            ["suspense_account_id", "company_id"], ["account.id", "account.company_id"],
+            name="ledger_settings_suspense_fkey",
+        ),
     )
 
     company_id: Mapped[UUID] = mapped_column(ForeignKey("company.id"), primary_key=True)
     rounding_account_id: Mapped[UUID | None]
     fx_gain_account_id: Mapped[UUID | None]
     fx_loss_account_id: Mapped[UUID | None]
+    # Added by migration 0003 with the chart of accounts.
+    receivable_account_id: Mapped[UUID | None]
+    payable_account_id: Mapped[UUID | None]
+    outstanding_receipts_account_id: Mapped[UUID | None]
+    outstanding_payments_account_id: Mapped[UUID | None]
+    suspense_account_id: Mapped[UUID | None]
 
 
 class JournalEntry(Base):

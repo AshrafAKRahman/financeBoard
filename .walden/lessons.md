@@ -20,3 +20,8 @@ Review this file before non-trivial work when the current request matches past m
 - Lesson: Scaffolded repo files were taken as correct and would have failed CI on the first PR touching .walden/**
 - Guardrail: After any tool scaffolds CI or templates, read every generated file and reconcile it with the project's real stack before the first push
 
+### 2026-09-18T09:27:10Z | identity-and-access | execute
+- Trigger: CI failed three times on things the local run could not catch: Settings required database URLs so the no-database unit job could not import the app; two tests back-dated a timestamp past a CHECK constraint
+- Lesson: Local runs always had backend/.env and pre-existing rows, so environment-free and constraint-edge paths were never exercised
+- Guardrail: Before pushing: run the unit suite with an empty environment (env -i) and, when a test back-dates a timestamp, move every column the row's CHECK constraints compare
+

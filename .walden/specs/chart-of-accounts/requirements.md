@@ -1,7 +1,7 @@
 ---
-status: draft
-approved_at:
-last_modified: 2026-09-18T07:04:29Z
+status: approved
+approved_at: 2026-09-18T09:39:32Z
+last_modified: 2026-09-18T09:39:32Z
 ---
 
 # Requirements Document
@@ -18,6 +18,12 @@ The core ledger (`.walden/specs/core-ledger`) already owns the `account`, `journ
 `ledger_settings` and `exchange_rate` tables and every posting invariant. This feature adds
 the rules and operations around them; it changes no posting behaviour.
 
+It is also the first feature people reach through the API. `identity-and-access` is built,
+so every endpoint here is company-scoped, states the permission it needs, and inherits
+session handling, the origin check and problem-details errors from that layer.
+
+<!-- decided 2026-09-18: this feature now includes its HTTP API, because identity-and-access shipped first and provides sessions, permissions, company scoping and the origin check -->
+<!-- assumed: every endpoint is company-scoped under /api/v1/companies/{company_id}/… so identity's company rules apply unchanged -->
 <!-- assumed: hierarchy stays parent/child on account with group accounts that cannot be posted to, as the ledger schema and docs/architecture.md §6.3 already establish -->
 <!-- assumed: the Saudi chart template is a starter set covering what Phase 1 needs (receivables, payables, bank and cash, VAT input/output, withholding tax payable, Zakat and end-of-service provisions, GOSI payable, revenue, cost of revenue, expenses, FX gain/loss, rounding, retained and current-year earnings), bilingual Arabic/English, and is editable after loading rather than locked -->
 <!-- assumed: archiving (active = false) replaces deletion for accounts that have been used, matching the ledger's no-hard-deletes rule -->
@@ -134,32 +140,99 @@ the rules and operations around them; it changes no posting behaviour.
 4. `R8.AC4` WHEN an accountant requests a chart readiness check, the system SHALL report any active currency that has no exchange rate.
 5. `R8.AC5` WHILE a company has no accounts, WHEN an accountant requests a chart readiness check, the system SHALL report that the chart is empty.
 
-<!-- decided 2026-09-18: no HTTP API in this feature. Users, login and the permission layer
-are being built first as the `identity-and-access` feature; the chart of accounts then gets
-its endpoints on top of it. This document stays in draft until that feature is done, so its
-API requirements can be added against a real permission layer. -->
+### R9 Chart of accounts API
+
+**User Story:** As an accountant, I want to manage the chart from the application, so that I do not need a developer to add an account.
+
+#### Acceptance Criteria
+
+1. `R9.AC1` WHEN a caller with `account:read` requests a company's chart, the system SHALL return its accounts with their hierarchy and depth.
+2. `R9.AC2` WHEN a caller requests the chart with a search term, the system SHALL return only accounts whose code or name matches it.
+3. `R9.AC3` WHEN a caller with `account:manage` submits a new account, the system SHALL create it and return it with its id.
+4. `R9.AC4` WHEN a caller with `account:manage` submits changes to an account, the system SHALL apply them and return the updated account.
+5. `R9.AC5` WHEN a caller with `account:manage` archives an account, the system SHALL mark it inactive and return no content.
+6. `R9.AC6` IF a caller without `account:manage` submits an account change, THEN the system SHALL refuse it with HTTP 403.
+7. `R9.AC7` IF a caller requests an account that belongs to another company, THEN the system SHALL answer as though it does not exist.
+8. `R9.AC8` WHEN a caller creates or changes an account, the system SHALL append an audit record naming the account code.
+
+### R10 Journals API
+
+**User Story:** As an accountant, I want to manage journals from the application, so that new bank accounts and document types can be set up without a deployment.
+
+#### Acceptance Criteria
+
+1. `R10.AC1` WHEN a caller with `journal:read` requests a company's journals, the system SHALL return them with their type and default account.
+2. `R10.AC2` WHEN a caller with `journal:manage` submits a new journal, the system SHALL create it and return it with its id.
+3. `R10.AC3` WHEN a caller with `journal:manage` archives a journal, the system SHALL mark it inactive and return no content.
+4. `R10.AC4` IF a caller without `journal:manage` submits a journal change, THEN the system SHALL refuse it with HTTP 403.
+5. `R10.AC5` WHEN a caller creates or changes a journal, the system SHALL append an audit record naming the journal code.
+
+### R11 Company defaults API
+
+**User Story:** As an accountant, I want to see and set the company's default accounts, so that posting works before the first invoice.
+
+#### Acceptance Criteria
+
+1. `R11.AC1` WHEN a caller with `account:read` requests the company's defaults, the system SHALL return each default with the account it points at, or nothing where it is unset.
+2. `R11.AC2` WHEN a caller with `account:manage` sets a default account, the system SHALL record it and return the updated defaults.
+3. `R11.AC3` IF a caller without `account:manage` sets a default, THEN the system SHALL refuse it with HTTP 403.
+4. `R11.AC4` WHEN a caller changes a default, the system SHALL append an audit record naming the default and the account.
+
+### R12 Template API
+
+**User Story:** As a new customer, I want to load the Saudi chart with one action, so that setup takes a moment rather than a day.
+
+#### Acceptance Criteria
+
+1. `R12.AC1` WHEN a caller with `chart:load` loads the Saudi template into an empty company, the system SHALL create its accounts, journals and defaults and return a summary of what was created.
+2. `R12.AC2` IF a caller without `chart:load` loads a template, THEN the system SHALL refuse it with HTTP 403.
+3. `R12.AC3` WHEN a caller lists the available templates, the system SHALL return each template's key, name and description.
+4. `R12.AC4` WHEN a template is loaded, the system SHALL append an audit record naming the template.
+
+### R13 Exchange rates API
+
+**User Story:** As an accountant, I want to enter exchange rates, so that foreign-currency documents convert at the rate I control.
+
+#### Acceptance Criteria
+
+1. `R13.AC1` WHEN a caller with `rate:read` requests a currency's rates, the system SHALL return them in date order.
+2. `R13.AC2` WHEN a caller with `rate:manage` submits a rate, the system SHALL record it and return it.
+3. `R13.AC3` WHEN a caller with `rate:manage` submits several rates at once, the system SHALL return how many were recorded and a reason for each rejected row.
+4. `R13.AC4` IF a caller without `rate:manage` submits a rate, THEN the system SHALL refuse it with HTTP 403.
+
+### R14 Access control for this module
+
+**User Story:** As a security reviewer, I want these endpoints held to the same rules as the rest of the system, so that the chart cannot be read or changed by the wrong person.
+
+#### Acceptance Criteria
+
+1. `R14.AC1` The system SHALL add the permissions `account:read`, `account:manage`, `journal:read`, `journal:manage`, `rate:read`, `rate:manage` and `chart:load` to the catalogue.
+2. `R14.AC2` The system SHALL grant every new permission to the Administrator role.
+3. `R14.AC3` The system SHALL scope every endpoint in this feature to a company named in its path.
+4. `R14.AC4` IF an unauthenticated caller requests any endpoint in this feature, THEN the system SHALL refuse it with HTTP 401.
+5. `R14.AC5` IF a caller requests a company they hold no role in, THEN the system SHALL refuse it with HTTP 403, identically to a company that does not exist.
+6. `R14.AC6` The system SHALL report every refusal in this feature as problem details carrying a `coa.*` or `identity.*` code.
 
 ## Non-Functional Requirements
 
 - `NFR1` Integrity: the ledger's own invariants stay untouched; this feature adds rules above them and never weakens a database constraint (proven by re-running the core-ledger invariant tests).
 - `NFR2` Auditability: nothing that has been used in the books is ever hard-deleted (proven by `R3`).
 - `NFR3` Localization: every account the Saudi template creates carries an Arabic and an English name (proven by `R6.AC1`).
-- `NFR4` Maintainability: chart-of-accounts code depends on the ledger only through `app.ledger.api`, enforced by import-linter.
+- `NFR4` Maintainability: chart-of-accounts code depends on the ledger only through `app.ledger.api`, and on identity only through the API layer's dependencies, enforced by import-linter.
+- `NFR6` Consistency: these endpoints use the same problem-details shape, session handling and origin check as `identity-and-access`, with no new error conventions (proven by `R14.AC6`).
 - `NFR5` Atomicity: multi-record operations (template load, rate import) either complete or leave nothing behind (proven by `R6.AC7`).
 
 ## Constraints And Dependencies
 
 - `C1` The `account`, `journal`, `ledger_settings` and `exchange_rate` tables already exist from the core ledger; changes to them come as new Alembic migrations.
 - `C2` The ledger already enforces: subtype belongs to type, receivable and payable accounts are reconcilable, group accounts cannot hold lines, an account with lines cannot become a group, and accounts cannot cross companies. This feature adds the rules the database does not cover.
-- `C3` Users, roles and permissions do not exist yet, so "an accountant" means any caller until the identity feature exists.
+- `C3` "An accountant" means a caller holding the stated permission in the company named in the path; sessions, the origin check and error shape come from `identity-and-access`.
 - `C4` Statutory rates and Zakat rules are out of scope; the template only creates the accounts they will post to.
 - `C5` Local test runs stay capped at two pytest workers, against the Neon `test` branch.
 
 ## Out Of Scope
 
-- Users, login, roles and permissions — the separate `identity-and-access` feature.
-- HTTP endpoints for accounts, journals, defaults, the template and rates — added to this
-  document once `identity-and-access` is approved and built.
+- Users, login, roles and permissions — delivered by `identity-and-access`.
 - Invoicing, taxes, payments, reconciliation and reports.
 - Importing a chart of accounts from a spreadsheet or another system.
 - Chart templates for countries other than Saudi Arabia.

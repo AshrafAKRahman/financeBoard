@@ -11,7 +11,7 @@ from sqlalchemy import text
 from app.api.csrf import CsrfMiddleware
 from app.api.errors import domain_error_handler
 from app.api.protection import check_routes, public
-from app.api.routes import admin, auth, invitations
+from app.api.routes import admin, auth, chart, invitations
 from app.db import pooled_engine, transaction
 from app.platform.access.api import ensure_catalogue_seeded
 from app.shared.errors import DomainError
@@ -42,6 +42,7 @@ app.add_exception_handler(DomainError, domain_error_handler)
 app.include_router(auth.router)
 app.include_router(invitations.router)
 app.include_router(admin.router)
+app.include_router(chart.router)
 
 
 @app.get("/api/v1/health", tags=["health"])
