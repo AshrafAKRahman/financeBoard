@@ -44,11 +44,12 @@ select = ["E", "F", "I", "B", "UP", "SIM", "DTZ", "RUF"]
 root_package = "app"
 
 [[tool.importlinter.contracts]]
-name = "Module layers: treasury -> billing -> coa -> ledger -> platform -> shared"
+name = "Module layers: reporting -> treasury -> billing -> coa -> ledger -> platform -> shared"
 type = "layers"
 layers = [
     "app.main",
     "app.api",
+    "app.reporting",
     "app.treasury",
     "app.billing",
     "app.coa",

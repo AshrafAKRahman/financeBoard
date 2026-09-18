@@ -1,7 +1,7 @@
 ---
 status: approved
-approved_at: 2026-09-17T19:11:00Z
-last_modified: 2026-09-17T19:11:00Z
+approved_at: 2026-09-18T19:02:29Z
+last_modified: 2026-09-18T19:02:29Z
 source_requirements_approved_at: 2026-09-17T19:11:00Z
 ---
 
@@ -217,7 +217,7 @@ copied (not re-converted) → steps 4–7 with `reversed_entry_id` set.
 | `journal` | `company_id`, `code` `^[A-Z0-9]{1,8}$`, `type`, `active` | `UNIQUE(id, company_id)` |
 | `ledger_settings` | `company_id` PK, `rounding_account_id`, `fx_gain_account_id`, `fx_loss_account_id` | Composite FKs to same-company accounts |
 | `journal_entry` | `company_id`, `journal_id`, `number`, `date`, `state`, `currency_code`, `reversed_entry_id`, `source_type`, `source_id`, `posted_at` | `journal_entry_guard`; deferred `journal_entry_balance`; unique `(journal_id, number)` (`R6.AC5`); unique `reversed_entry_id` (`R11.AC5`); unique `(source_type, source_id)` (`R12.AC1`); composite FKs to journal and reversed entry (`R9.AC2`, `R9.AC3`); posted ⇒ number and posted_at |
-| `journal_entry_line` | `entry_id`, `company_id`, `line_no`, `account_id`, `debit`, `credit`, `currency_code`, `amount_currency`, `partner_id`, `tax_id`, `tax_grid_tag`, `due_date` | `debit,credit ≥ 0` (`R3.AC4`); one-sided (`R3.AC5`); sign agreement `(debit-credit)*amount_currency ≥ 0` (`R3.AC6`); `journal_entry_line_guard` (`R3.AC7`, `R3.AC8`, `R4.AC3`, `R10.AC1`); composite FKs to entry (cascade for drafts) and account (`R9.AC1`) |
+| `journal_entry_line` | `entry_id`, `company_id`, `line_no`, `account_id`, `debit`, `credit`, `currency_code`, `amount_currency`, `partner_id`, `tax_id`, `tax_grid_tag`, `tax_base`, `due_date` | `debit,credit ≥ 0` (`R3.AC4`); one-sided (`R3.AC5`); sign agreement `(debit-credit)*amount_currency ≥ 0` (`R3.AC6`); `journal_entry_line_guard` (`R3.AC7`, `R3.AC8`, `R4.AC3`, `R10.AC1`); composite FKs to entry (cascade for drafts) and account (`R9.AC1`) |
 
 **Entry state machine:**
 
@@ -295,6 +295,11 @@ stateDiagram-v2
 - Failure mode: interrupted test runs leave `ledger_test_*` databases on the Neon branch.
   - Mitigation: `neon-branch.sh reset test` recreates the branch; databases are
     uniquely named so leftovers never break later runs.
+- Amended by `financial-reports` (migration `0006`): `tax_base` records the amount a tax was
+  charged on, so the VAT return can be rebuilt from posted entries alone rather than from the
+  documents beside them. Additive and nullable, with `CHECK (tax_base IS NULL OR tax_grid_tag
+  IS NOT NULL)`. The `ledger.zero_line` rule is deliberately **not** relaxed: a zero-amount
+  tax group is recorded by tagging its base line instead of by posting an empty line.
 - Tradeoff: `partner_id` and `tax_id` have no foreign keys yet (`C4`); added by the partner
   and tax features' migrations.
 

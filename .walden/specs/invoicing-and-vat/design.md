@@ -1,7 +1,7 @@
 ---
 status: approved
-approved_at: 2026-09-18T12:04:41Z
-last_modified: 2026-09-18T12:04:41Z
+approved_at: 2026-09-18T19:02:29Z
+last_modified: 2026-09-18T19:02:29Z
 source_requirements_approved_at: 2026-09-18T11:57:16Z
 ---
 
@@ -212,6 +212,20 @@ deletes are refused with `invoicing.posted_immutable`.
 **Saudi taxes** (`R1.AC10`): VAT 15% on sales (account 2200) and on purchases (account
 1300), zero-rated 0% with reason "Export of goods outside the GCC", and exempt 0% with
 reason "Exempt financial supply", each with its VAT return grid tag.
+
+**Amended by `financial-reports`** — the VAT return has to be rebuildable from posted entries,
+so posting now records what each tax was charged on:
+
+- A tax line carries `tax_base = group.base` beside the `tax_grid_tag` it already had.
+- A tax group worth nothing (zero-rated, exempt, out of scope) produces no tax line, because
+  `build_posting_request` drops zero-amount lines to respect `ledger.zero_line`. Its
+  `tax_grid_tag` and `tax_base` therefore go on the **base line** — the posting line for the
+  document line that carried the tax. Without this a zero-rated export leaves no trace in the
+  ledger and ZATCA boxes 3 to 5 cannot be produced.
+- `IF one document line carries two different zero-amount taxes`, a single posting line cannot
+  hold both tags, so posting is refused with `tax.ambiguous_zero_rated`.
+
+Per-line rounding (D2), tax-inclusive pricing (D3) and grouping by tax are unchanged.
 
 They live in `app.billing.taxes.install_saudi_taxes`, **not** in the chart template:
 `app.coa` sits below `app.billing`, so the template cannot create taxes without inverting

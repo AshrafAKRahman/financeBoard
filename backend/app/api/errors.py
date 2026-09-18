@@ -128,6 +128,12 @@ _STATUSES: dict[str, tuple[int, str]] = {
     "payments.not_a_bank_account": (422, "That is not a bank or cash account"),
     "payments.unreadable_file": (422, "The statement file could not be read"),
     "payments.unknown_format": (422, "Unknown statement format"),
+    # Reporting
+    "reporting.account_not_found": (404, "Account not found"),
+    "reporting.company_not_found": (404, "Company not found"),
+    "reporting.no_fiscal_year": (409, "The company has no fiscal year"),
+    "reporting.invalid_period": (422, "Invalid period"),
+    "tax.ambiguous_zero_rated": (422, "One line cannot sit in two VAT boxes"),
 }
 
 DEFAULT = (409, "Request refused")

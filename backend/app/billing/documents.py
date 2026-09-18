@@ -344,6 +344,57 @@ def _check_taxes(session: Session, document: Document) -> None:
                 )
 
 
+@dataclass(frozen=True, slots=True)
+class _UntaxedBasis:
+    """A zero-amount tax, recorded on the line it was charged on rather than on a tax line."""
+
+    tax_id: UUID
+    grid_tag: str | None
+    base: Decimal
+
+
+def _zero_rated_tags(session: Session, document: Document) -> dict[UUID, _UntaxedBasis]:
+    """Which document lines must carry a tax tag themselves, and for which tax (`R6.AC5`).
+
+    Only taxes worth nothing qualify: everything else gets a tax line of its own, and that
+    line carries the tag and the basis.
+    """
+    places = currency_places(session, document.currency_code)
+    found: dict[UUID, _UntaxedBasis] = {}
+
+    for line in document.lines:
+        amounts = document_totals(
+            [
+                LineInput(
+                    quantity=line.quantity,
+                    unit_price=line.unit_price,
+                    taxes=[as_rate(tax) for tax in taxes_of(session, line)],
+                    discount_percent=line.discount_percent,
+                )
+            ],
+            places,
+            tax_inclusive=document.tax_inclusive,
+        )
+        untaxed = [group for group in amounts.tax_groups if group.amount == ZERO]
+        if not untaxed:
+            continue
+        if len(untaxed) > 1:
+            raise DomainError(
+                "tax.ambiguous_zero_rated",
+                f"{line.description!r} carries {len(untaxed)} taxes worth nothing; "
+                "one line cannot be reported under two return boxes",
+            )
+        group = untaxed[0]
+        tax = session.get(Tax, group.tax.id)
+        found[line.id] = _UntaxedBasis(
+            tax_id=group.tax.id,
+            grid_tag=tax.grid_tag if tax else None,
+            base=group.base,
+        )
+
+    return found
+
+
 def build_posting_request(session: Session, document: Document) -> PostingRequest:
     """One journal entry: the open item, the income or expense lines, and the taxes.
 
@@ -372,6 +423,10 @@ def build_posting_request(session: Session, document: Document) -> PostingReques
     ]
 
     places = currency_places(session, document.currency_code)
+    # A tax worth nothing produces no tax line — build_posting_request drops empty lines to
+    # respect ledger.zero_line — so its grid tag and basis go on the line it was charged on.
+    # Without this a zero-rated export leaves no trace and ZATCA boxes 3-5 cannot be built.
+    zero_rated = _zero_rated_tags(session, document)
     for line in document.lines:
         amounts = document_totals(
             [
@@ -385,10 +440,14 @@ def build_posting_request(session: Session, document: Document) -> PostingReques
             places,
             tax_inclusive=document.tax_inclusive,
         )
+        untaxed = zero_rated.get(line.id)
         lines.append(
             PostingLine(
                 account_id=line.account_id,
                 name=line.description,
+                tax_id=untaxed.tax_id if untaxed else None,
+                tax_grid_tag=untaxed.grid_tag if untaxed else None,
+                tax_base=untaxed.base if untaxed else None,
                 **sided(amounts.net, debit=not open_item_is_debit),
             )
         )
@@ -405,6 +464,7 @@ def build_posting_request(session: Session, document: Document) -> PostingReques
                 name=tax.name,
                 tax_id=tax.id,
                 tax_grid_tag=tax.grid_tag,
+                tax_base=group.base,
                 **sided(group.amount, debit=not open_item_is_debit),
             )
         )
