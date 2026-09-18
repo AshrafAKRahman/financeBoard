@@ -1,7 +1,7 @@
 ---
 status: approved
 approved_at: 2026-09-18T16:04:36Z
-last_modified: 2026-09-18T16:16:40Z
+last_modified: 2026-09-18T18:02:55Z
 source_design_approved_at: 2026-09-18T16:04:36Z
 ---
 
@@ -127,8 +127,8 @@ tests use the Neon `test` branch through `TEST_DATABASE_URL`; concurrency tests 
       - command: ["sh", "-c", "cd backend && uv run pytest tests/concurrency/test_matching_races.py -q"]
         covers: ["R11.AC4"]
 
-- [ ] 8. Delivery
-  - [ ] 8.1 Full gate: format, lint, layers, whole suite
+- [x] 8. Delivery
+  - [x] 8.1 Full gate: format, lint, layers, whole suite
     - Requirements: `NFR2`, `NFR4`, `NFR5`, `NFR6`, `C1`, `C2`, `C3`, `C4`, `C5`
     - Design: Verification Plan
     - Verification:
@@ -138,13 +138,13 @@ tests use the Neon `test` branch through `TEST_DATABASE_URL`; concurrency tests 
         covers: ["NFR2", "NFR6"]
       - command: ["sh", "-c", "cd backend && uv run pytest tests/concurrency -q"]
         covers: ["NFR1"]
-  - [ ] 8.2 An end-to-end pass: foreign-currency invoice, payment, match, statement
+  - [x] 8.2 An end-to-end pass: foreign-currency invoice, payment, match, statement
     - Requirements: `R5.AC4`, `R6.AC3`, `NFR6`
     - Design: Verification Plan (operational evidence)
     - Verification:
       - command: ["sh", "-c", "cd backend && uv run pytest tests/treasury/test_end_to_end.py -q"]
         covers: ["R5.AC4", "R6.AC3", "NFR6"]
-  - [ ] 8.3 Push, green CI, merge
+  - [x] 8.3 Push, green CI, merge
     - Requirements: `C6`
     - Design: Verification Plan
     - Verification:
