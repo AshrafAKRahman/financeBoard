@@ -47,6 +47,7 @@ type = "layers"
 layers = [
     "app.main",
     "app.api",
+    "app.billing",
     "app.coa",
     "app.ledger",
     "app.platform",

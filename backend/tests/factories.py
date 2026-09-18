@@ -190,3 +190,117 @@ def insert_line(
         },
     )
     return line_id
+
+
+def make_billing_company(session: Session):
+    """A company with the Saudi chart and its taxes — what a real customer starts from."""
+    from app.billing.taxes import install_saudi_taxes
+    from app.coa.templates import load_template
+    from app.ledger.api import LedgerSettings
+
+    company = Company(
+        id=uuid7(), name="Riyadh Trading", base_currency="SAR", vat_number="3" * 15
+    )
+    session.add(company)
+    session.flush()
+    session.add(LedgerSettings(company_id=company.id))
+    session.flush()
+    load_template(session, company.id, "sa")
+    install_saudi_taxes(session, company.id)
+    session.commit()
+    return company
+
+
+def make_partner(session: Session, company_id: UUID, **overrides):
+    from app.billing.partners import PartnerData, create_partner
+
+    values = {"name": "Al Noor Est", "type": "customer"}
+    values.update(overrides)
+    partner = create_partner(session, company_id, PartnerData(**values))
+    session.commit()
+    return partner
+
+
+SMALL_CHART = [
+    # code, name, type, subtype
+    ("1200", "Trade Receivables", "asset", "receivable"),
+    ("1300", "VAT Input", "asset", "current_asset"),
+    ("2100", "Trade Payables", "liability", "payable"),
+    ("2200", "VAT Output", "liability", "current_liability"),
+    ("4100", "Sales Revenue", "income", "income"),
+    ("5300", "Rent", "expense", "expense"),
+    ("5900", "Rounding", "expense", "expense"),
+]
+
+
+def make_small_billing_company(session: Session):
+    """A company with just enough chart to raise an invoice.
+
+    Built with direct inserts rather than the services: the services have their own tests,
+    and this fixture runs before nearly every billing test, so its round trips are the
+    difference between a fast suite and a slow one.
+    """
+    from decimal import Decimal as D
+
+    from app.billing.models import Tax
+    from app.ledger.api import Account, Journal, LedgerSettings
+
+    company = Company(id=uuid7(), name="Small Co", base_currency="SAR", vat_number="3" * 15)
+    session.add(company)
+    session.flush()
+
+    accounts = {
+        code: Account(
+            id=uuid7(),
+            company_id=company.id,
+            code=code,
+            name=name,
+            type=type_,
+            subtype=subtype,
+            is_reconcilable=subtype in ("receivable", "payable"),
+        )
+        for code, name, type_, subtype in SMALL_CHART
+    }
+    journals = [
+        Journal(id=uuid7(), company_id=company.id, code=code, name=name, type=type_)
+        for code, name, type_ in (
+            ("INV", "Customer Invoices", "sales"),
+            ("BILL", "Vendor Bills", "purchases"),
+            ("MISC", "Miscellaneous", "general"),
+        )
+    ]
+    session.add_all([*accounts.values(), *journals])
+    session.flush()
+
+    session.add(
+        LedgerSettings(
+            company_id=company.id,
+            receivable_account_id=accounts["1200"].id,
+            payable_account_id=accounts["2100"].id,
+            rounding_account_id=accounts["5900"].id,
+        )
+    )
+    session.add_all(
+        [
+            Tax(
+                id=uuid7(),
+                company_id=company.id,
+                name="VAT 15%",
+                rate=D("15"),
+                type="sale",
+                account_id=accounts["2200"].id,
+                grid_tag="sales_standard",
+            ),
+            Tax(
+                id=uuid7(),
+                company_id=company.id,
+                name="VAT 15% (purchases)",
+                rate=D("15"),
+                type="purchase",
+                account_id=accounts["1300"].id,
+                grid_tag="purchases_standard",
+            ),
+        ]
+    )
+    session.commit()
+    return company

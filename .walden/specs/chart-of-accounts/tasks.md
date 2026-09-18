@@ -1,7 +1,7 @@
 ---
 status: approved
 approved_at: 2026-09-18T09:41:50Z
-last_modified: 2026-09-18T11:47:17Z
+last_modified: 2026-09-18T11:53:56Z
 source_design_approved_at: 2026-09-18T09:41:03Z
 ---
 
@@ -98,7 +98,7 @@ tests use the Neon `test` branch through `TEST_DATABASE_URL`.
       - command: ["sh", "-c", "cd backend && uv run pytest tests/api/test_chart_setup.py -q"]
         covers: ["R10.AC1", "R10.AC2", "R10.AC3", "R10.AC4", "R10.AC5", "R11.AC1", "R11.AC2", "R11.AC3", "R11.AC4", "R12.AC1", "R12.AC2", "R12.AC3", "R12.AC4", "R13.AC1", "R13.AC2", "R13.AC3", "R13.AC4"]
 
-- [ ] 4. Gates and delivery
+- [x] 4. Gates and delivery
   - [x] 4.1 Architecture contract for the new module and a full gate run
     - Requirements: `NFR1`, `NFR4`
     - Design: Architecture (layering); Verification Plan
@@ -106,7 +106,7 @@ tests use the Neon `test` branch through `TEST_DATABASE_URL`.
       - command: ["sh", "-c", "cd backend && uv run ruff check . && uv run lint-imports"]
       - command: ["sh", "-c", "cd backend && uv run pytest tests/unit tests/ledger tests/identity tests/coa tests/invariants tests/api -n 2 -q"]
       - command: ["sh", "-c", "cd backend && uv run pytest tests/concurrency -q"]
-  - [ ] 4.2 Push the branch, green CI, merge
+  - [x] 4.2 Push the branch, green CI, merge
     - Requirements: `C5`
     - Design: Verification Plan
     - Verification:

@@ -230,17 +230,22 @@ class TestCatalogue:
     def test_a_new_code_is_added_and_granted_to_the_administrator(
         self, session: Session, monkeypatch: pytest.MonkeyPatch
     ) -> None:
-        """A permission added in code needs no migration."""
-        monkeypatch.setitem(access.PERMISSIONS, "invoice:post", "Post invoices")
+        """A permission added in code needs no migration.
+
+        The code has to be one no migration has seeded, or there is nothing to add.
+        """
+        invented = "widget:polish"
+        monkeypatch.setitem(access.PERMISSIONS, invented, "Polish widgets")
 
         assert access.ensure_catalogue_seeded(session) == 1
         session.commit()
 
         administrator = access.get_role_by_name(session, ADMINISTRATOR_ROLE_NAME)
-        assert "invoice:post" in access.role_permissions(session, administrator.id)
+        assert invented in access.role_permissions(session, administrator.id)
 
         session.execute(
-            text("DELETE FROM role_permission WHERE permission_code = 'invoice:post'")
+            text("DELETE FROM role_permission WHERE permission_code = :code"),
+            {"code": invented},
         )
-        session.execute(text("DELETE FROM permission WHERE code = 'invoice:post'"))
+        session.execute(text("DELETE FROM permission WHERE code = :code"), {"code": invented})
         session.commit()
