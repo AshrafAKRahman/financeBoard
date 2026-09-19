@@ -1,6 +1,6 @@
 # Finance ERP — Architecture
 
-Status: **All decisions D1–D15 made; Phase 1 build in progress** · Scope: Phase 1 in detail, Phases 2–4 as boundaries and
+Status: **All decisions D1–D17 made; Phase 1 build in progress** · Scope: Phase 1 in detail, Phases 2–4 as boundaries and
 extension points · Source brief: [`../finance-erp-mvp-prompt.md`](../finance-erp-mvp-prompt.md)
 
 Decision log: see §14. Dependencies in §2 approved.
@@ -730,11 +730,19 @@ any time, and a nightly job compares it with raw lines and alerts on any differe
 | D12 | Database service (pre-production) | ✅ **Decided:** **Neon** Postgres, nothing database-related on the local machine. Production database moves to Alibaba ApsaraDB with the rest of the stack. See §17.2. |
 | D13 | Getting data out of the system | ✅ **Decided:** **CSV on every list**, not only on reports. Exports are their own endpoint family (`/exports/...`) so the already-approved list contracts stay untouched; each one reuses the read permission of the resource it exports, applies the same company scoping and the same filters as the screen, streams rather than buffers, and appends an audit record. Excel and PDF are deliberately not in Phase 1: a CSV opens in Excel, and a PDF of a report is a printing concern that belongs with the invoice PDF work. |
 | D14 | Reading a receipt or an invoice | ✅ **Decided:** **ZATCA QR first, vision model second.** A Saudi simplified invoice carries seller name, VAT number, timestamp, total and VAT amount in a base64 TLV payload inside its QR code — exact figures, no confidence score, and they can be checked against the seller's VAT number we already hold. A vision model handles foreign or non-compliant documents and the line detail a QR never carries. Either way the result is a **draft** a person confirms; nothing posts because a model was sure. QR decoding library to be chosen at spec time (`zxing-cpp` and `opencv-python-headless` are the candidates — both ship wheels, neither needs a system library). |
+| D16 | Where the frontend lives and how it is served | ✅ **Decided:** **one repository** (`frontend/` per §16) and **one origin**. The session cookie is `HttpOnly; SameSite=Lax`, so a browser will not send it cross-origin — no amount of CORS changes that. Vite proxies `/api` in development; in production the API serves the built assets with an SPA fallback. This needs no backend change, adds no CORS, and leaves the cookie's cross-site protection intact. A static host proxying `/api/*` (Cloudflare Pages) stays available for later and is the same shape the Alibaba move (D10) will introduce anyway. One repository is also what lets CI fail when the generated client drifts from the API, which needs the schema and the client in one run. |
+| D17 | Ant Design components that fail an accessibility check | ✅ **Decided:** **replace the component, do not suppress the rule.** Building the report screens, axe-core found two genuine defects in Ant Design's own markup: `Segmented` nests its `role="option"` elements inside `<label>`, so the listbox never owns them, and `Skeleton` renders empty `<h3>` headings that read as blank headings while a report loads. Both were fixed at the call site — a real `Radio.Group` for the period control, `aria-hidden` on the skeleton with the announcement moved to the surrounding `role="status"` — rather than by disabling an axe rule. A disabled rule hides the next instance too. Only `color-contrast` is disabled in the test run, and only because jsdom has no computed colours; contrast is settled in the design tokens instead. |
 | D15 | When the frontend is built | ✅ **Decided:** **After the reporting API, before document capture.** The reports are what make screens worth having, and capture needs a review screen to be safe. The frontend is now an explicit Phase 1 deliverable (brief item 10), not an implication of the i18n requirement. |
 
 ---
 
 ## 15. Phase 1 testing strategy
+
+> **Running the database-backed suites locally.** Every one of these tests commits for real
+> against a Neon branch in another region, so each is a handful of network round trips and the
+> suite is latency-bound, not CPU-bound — tens of minutes locally against a few minutes in CI.
+> A run showing 0% CPU and no output is waiting on the network, not stuck; pipe it to a file
+> and watch the file rather than pausing on a pipe, which buffers until the process exits.
 
 - **Database invariant tests** that bypass the application and write raw SQL to prove the
   triggers reject: unbalanced posted entries, edits to posted lines, `posted → draft`,
@@ -779,7 +787,16 @@ finance/
     seeds/                 Saudi demo company
     importlinter.ini
   frontend/
-    src/                   app shell, i18n (ar/en), modules mirror backend
+    src/
+      api/                 client generated from the API's own schema, plus its error contract
+      money/               formatting only — the browser never computes an amount
+      periods/             the period a report covers; the URL is the state
+      charts/              two hand-drawn SVG charts, each with a table alternative
+      i18n/                en.json and ar.json, which must always hold the same keys
+      shell/               signing in, the frame, switching company and language
+      reports/             the seven report screens and the drill-through
+      a11y/ storage/       whole-application proofs, not components
+    scripts/               generate-client.mjs (drift gate), check-size.mjs (size budget)
   infra/
     railway/               service definitions (api, worker, web)
     scripts/               neon-branch.sh (create/reset/delete branches), migrate.sh

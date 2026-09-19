@@ -50,3 +50,23 @@ Review this file before non-trivial work when the current request matches past m
 - Lesson: Against a hosted database the cost of a report is the number of queries, not the number of rows — and a design claiming 'one query' is worth checking against the code that implements it
 - Guardrail: When a report or endpoint misses a latency budget, count its round trips before optimising SQL; fold conditional sums into one query rather than asking the database the same question with different dates
 
+### 2026-09-19T07:53:58Z | web-shell-and-reports | execute
+- Trigger: A task's verification command ran `npm run test`, whose script was bare `vitest`; the run never exited and the proof hung until it was killed.
+- Lesson: A script named `test` that watches by default cannot be a verification command, and hangs CI rather than failing it. The default mode of a command is part of its contract.
+- Guardrail: `npm run test` runs once and exits; watching is a separate `test:watch` script.
+
+### 2026-09-19T07:53:58Z | web-shell-and-reports | execute
+- Trigger: `--maxWorkers=2`, required by the project's memory rule, was rejected by vitest as conflicting with a minimum worker count taken from the core count.
+- Lesson: A cap passed on the command line can conflict with a floor the tool derives from the machine. The cap belongs in the configuration, where it applies to every run, not only the ones that remember the flag.
+- Guardrail: Worker limits live in `vite.config.ts` (`minWorkers: 1, maxWorkers: 2`), so no run can go uncapped.
+
+### 2026-09-19T07:53:58Z | web-shell-and-reports | execute
+- Trigger: axe-core found two accessibility violations on every report screen, both originating in Ant Design's own markup rather than in code written here.
+- Lesson: A component library's markup is not automatically accessible. Disabling the rule that caught it would have hidden every future instance too; replacing the component fixed the class of defect.
+- Guardrail: An axe rule is disabled only when the test environment cannot judge it (colour contrast in jsdom); a real violation is fixed at the call site.
+
+### 2026-09-19T08:23:06Z | web-shell-and-reports | execute
+- Trigger: A test suite piped to `tail` showed no output and sat at 0% CPU; it was called hung and killed three times. It had in fact reached 33% and was waiting on network round trips to Neon.
+- Lesson: Silence is not evidence of a hang. A pipe to `tail` or `head` buffers everything until the process exits, and 0% CPU is what I/O-bound waiting looks like — both symptoms of a healthy slow run are identical to a stuck one.
+- Guardrail: A long run writes to a file and is watched incrementally; before declaring a hang, confirm there is no progress in unbuffered output.
+

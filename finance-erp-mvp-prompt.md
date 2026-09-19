@@ -94,6 +94,11 @@ this order:
    matching screen, bank reconciliation, and the reports with basic charts (revenue
    over time, receivables ageing). Arabic/English and RTL from the first screen, not
    retrofitted. Money is formatted, never recomputed, in the browser.
+   - *Delivered so far* (`web-shell-and-reports`): the shell — signing in and out,
+     switching company, English and Arabic with the layout mirrored — and all seven
+     reports with drill-through to the entries behind any figure. The transactional
+     screens (chart of accounts, partners, invoices, bills, payments, matching, bank
+     reconciliation) are the next slice.
 11. **Document capture**: attach the source document to what it records, and stop
    retyping it.
    - Attachments on any document, stored in object storage, never in the database.

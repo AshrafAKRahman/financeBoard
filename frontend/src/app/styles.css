@@ -1,0 +1,88 @@
+:root {
+  --ink: #13201a;
+  --muted: #5d6d63;
+  --rule: #d8e0d6;
+  --paper: #f7f9f6;
+  --accent: #0f5c46;
+  --negative: #a4342a;
+}
+
+body {
+  margin: 0;
+  background: var(--paper);
+  color: var(--ink);
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+}
+
+/* Figures never mirror: a reversed number is a wrong number (R3.AC5). */
+.amount {
+  font-variant-numeric: tabular-nums;
+  text-align: end;
+  white-space: nowrap;
+  unicode-bidi: isolate;
+  direction: ltr;
+}
+
+.amount.negative { color: var(--negative); }
+.amount.zero { color: var(--muted); }
+
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* R11.AC2 — focus is always visible, never removed for looks. */
+:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.skip-link {
+  position: absolute;
+  inset-inline-start: -9999px;
+}
+.skip-link:focus {
+  inset-inline-start: 1rem;
+  top: 0.5rem;
+  z-index: 100;
+  background: #fff;
+  padding: 0.5rem 1rem;
+}
+
+.chart { margin: 0; }
+.chart-legend {
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+  font-size: 12px;
+  color: var(--muted);
+  padding-top: 0.25rem;
+}
+.chart-swatch {
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  border-radius: 2px;
+  margin-inline-end: 0.35rem;
+}
+.chart-unit { margin-inline-start: auto; }
+
+.report-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.25rem 1.5rem;
+  color: var(--muted);
+  font-size: 13px;
+}
+
+/* NFR5 — a controller checks figures on a phone. */
+@media (max-width: 480px) {
+  .report-meta { flex-direction: column; gap: 0.15rem; }
+}
