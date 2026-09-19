@@ -21,6 +21,9 @@ ALLOWED_PUBLIC_PATHS = {
     "/api/v1/auth/login",
     "/api/v1/invitations/{token}",
     "/api/v1/invitations/{token}/accept",
+    # The web application's own HTML and assets. It contains no data: every figure it shows
+    # is fetched afterwards from an endpoint that does check (decision D16).
+    "/{path:path}",
 }
 
 

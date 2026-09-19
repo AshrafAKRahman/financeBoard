@@ -12,6 +12,7 @@ from app.api.csrf import CsrfMiddleware
 from app.api.errors import domain_error_handler
 from app.api.protection import check_routes, public
 from app.api.routes import admin, auth, billing, chart, invitations, reports, treasury
+from app.api.spa import mount_web_application
 from app.db import pooled_engine, transaction
 from app.platform.access.api import ensure_catalogue_seeded
 from app.shared.errors import DomainError
@@ -58,6 +59,11 @@ def health() -> JSONResponse:
         return JSONResponse({"status": "degraded", "database": "unreachable"}, status_code=503)
     return JSONResponse({"status": "ok", "database": "ok"})
 
+
+# After the routers, because its catch-all would otherwise shadow them, and before the
+# protection check, so the route it adds is checked like any other. Absent in development,
+# where Vite serves the application and this mounts nothing.
+mount_web_application(app)
 
 # Import time, not start-up time: an unprotected route must never reach a running server.
 check_routes(app)

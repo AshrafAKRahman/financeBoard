@@ -13,7 +13,7 @@ multi-currency, invoicing, VAT + ZATCA e-invoicing, payments and reconciliation,
 multi-company, CSV export, the Phase 1 screens, and document capture).
 
 Sources of truth: `finance-erp-mvp-prompt.md` (brief) and `docs/architecture.md`
-(architecture and decisions D1–D15).
+(architecture and decisions D1–D16).
 
 ## Tech Stack
 
@@ -55,7 +55,7 @@ TEST_DATABASE_URL=<neon direct url> uv run pytest -n 2
 ## Key Files
 
 - `finance-erp-mvp-prompt.md` — product brief and phase plan
-- `docs/architecture.md` — architecture, data model, decisions D1–D15
+- `docs/architecture.md` — architecture, data model, decisions D1–D16
 - `backend/pyproject.toml` — dependencies, pytest, ruff, import-linter contracts
 - `backend/migrations/versions/` — schema and invariant triggers
 - `backend/app/db.py` — engines, Neon pooled vs direct, unit of work
@@ -71,6 +71,9 @@ TEST_DATABASE_URL=<neon direct url> uv run pytest -n 2
 - **Extracted data is never posted.** Reading a receipt's QR code or running a document
   through a vision model produces a draft for a person to confirm. Nothing reaches the
   ledger because a model was confident (D14).
+- **The browser formats money; it never computes it.** Amounts cross the wire as strings and
+  stay strings: no `Number()`, no re-rounding, no re-totalling. The server is authoritative
+  for every figure (D16, R4).
 - **Whoever may read a list may export it.** Exports add no permission of their own, obey
   the same company scoping and filters as the screen they came from, and are recorded in
   the audit log (D13).
