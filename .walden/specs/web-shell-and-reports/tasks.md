@@ -1,7 +1,7 @@
 ---
 status: approved
 approved_at: 2026-09-19T07:07:19Z
-last_modified: 2026-09-19T09:02:35Z
+last_modified: 2026-09-19T09:16:54Z
 source_design_approved_at: 2026-09-19T07:05:54Z
 ---
 
@@ -134,7 +134,7 @@ memory-capped per the project's rule (`vitest --maxWorkers=2`).
       - command: ["sh", "-c", "cd frontend && npx tsc --noEmit && npm run lint && npm run test -- --maxWorkers=2 --run && npm run check:client && npm run build && npm run check:size"]
         covers: ["C6", "C7", "NFR4"]
 
-- [ ] 7. Delivery
+- [x] 7. Delivery
   - [x] 7.1 Full gate: both sides, format, lint, types, tests
     - Requirements: `C1`, `C2`, `C5`, `C7`
     - Design: Verification Plan
@@ -145,7 +145,7 @@ memory-capped per the project's rule (`vitest --maxWorkers=2`).
         covers: ["C1", "C6"]
       - command: ["sh", "-c", "cd backend && uv run pytest tests/api tests/unit -q -n 2"]
         covers: ["C5"]
-  - [ ] 7.2 Push, green CI, merge
+  - [x] 7.2 Push, green CI, merge
     - Requirements: `C7`
     - Design: Verification Plan
     - Verification:
