@@ -1,7 +1,7 @@
 ---
 status: approved
 approved_at: 2026-09-19T07:07:19Z
-last_modified: 2026-09-19T07:48:41Z
+last_modified: 2026-09-19T09:02:35Z
 source_design_approved_at: 2026-09-19T07:05:54Z
 ---
 
@@ -135,7 +135,7 @@ memory-capped per the project's rule (`vitest --maxWorkers=2`).
         covers: ["C6", "C7", "NFR4"]
 
 - [ ] 7. Delivery
-  - [ ] 7.1 Full gate: both sides, format, lint, types, tests
+  - [x] 7.1 Full gate: both sides, format, lint, types, tests
     - Requirements: `C1`, `C2`, `C5`, `C7`
     - Design: Verification Plan
     - Verification:

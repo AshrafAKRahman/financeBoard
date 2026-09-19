@@ -65,3 +65,8 @@ Review this file before non-trivial work when the current request matches past m
 - Lesson: A component library's markup is not automatically accessible. Disabling the rule that caught it would have hidden every future instance too; replacing the component fixed the class of defect.
 - Guardrail: An axe rule is disabled only when the test environment cannot judge it (colour contrast in jsdom); a real violation is fixed at the call site.
 
+### 2026-09-19T08:23:06Z | web-shell-and-reports | execute
+- Trigger: A test suite piped to `tail` showed no output and sat at 0% CPU; it was called hung and killed three times. It had in fact reached 33% and was waiting on network round trips to Neon.
+- Lesson: Silence is not evidence of a hang. A pipe to `tail` or `head` buffers everything until the process exits, and 0% CPU is what I/O-bound waiting looks like — both symptoms of a healthy slow run are identical to a stuck one.
+- Guardrail: A long run writes to a file and is watched incrementally; before declaring a hang, confirm there is no progress in unbuffered output.
+

@@ -738,6 +738,12 @@ any time, and a nightly job compares it with raw lines and alerts on any differe
 
 ## 15. Phase 1 testing strategy
 
+> **Running the database-backed suites locally.** Every one of these tests commits for real
+> against a Neon branch in another region, so each is a handful of network round trips and the
+> suite is latency-bound, not CPU-bound — tens of minutes locally against a few minutes in CI.
+> A run showing 0% CPU and no output is waiting on the network, not stuck; pipe it to a file
+> and watch the file rather than pausing on a pipe, which buffers until the process exits.
+
 - **Database invariant tests** that bypass the application and write raw SQL to prove the
   triggers reject: unbalanced posted entries, edits to posted lines, `posted → draft`,
   cross-company references, postings inside locked periods, over-reconciliation.
